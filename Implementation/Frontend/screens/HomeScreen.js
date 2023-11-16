@@ -21,11 +21,11 @@ function HomeScreen({ navigation }) {
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
     const data = await axios.get("http://localhost:3000/api/data");
-    console.log("data ya bastard", data);
+    // console.log("data ya bastard", data);
     for (const section of data.data) {
       for (const product of section.d) {
         if (product.n.toLowerCase().includes(searchTextLower)) {
-          filteredItems.push({ n: product.n, p: product.p });
+          filteredItems.push({ n: product.n, p: product.p, c: section.n });
         }
       }
     }
@@ -46,8 +46,6 @@ function HomeScreen({ navigation }) {
     }, [])
   );
 
-  //   const flattenedData = data.data.flat();
-  //   const shuffledData = Array.isArray(flattenedData) ? shuffle(flattenedData.d) : [];
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
@@ -81,7 +79,7 @@ function HomeScreen({ navigation }) {
         <View style={styles.searchdropdownContainer}>
           <FlatList
             // style={{ position: 'absolute', top: 100, left: 0, right: 0, bottom: 0 }}
-            data={filteredProducts.slice(0, 10)}
+            data={filteredProducts.slice(0, 100)}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.productItem}>
@@ -97,19 +95,6 @@ function HomeScreen({ navigation }) {
         <Text>Best Deals</Text>
         <FontAwesome name="image" size={256} color="black" />
       </View>
-      {/* <View style={styles.dealsContainer}>
-        <Text>Best Deals</Text>
-        <FlatList
-          data={shuffledData.slice(0, 3)}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.productItem}>
-              <Text>Name: {item.n}</Text>
-              <Text>Price: €{item.p}</Text>
-            </View>
-          )}
-        />
-      </View> */}
     </View>
   );
 }
@@ -157,7 +142,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderRadius: 5,
     alignSelf: "center",
-    placeholderTextColor: "#a9a9a9",
   },
   productItem: {
     marginBottom: 10,
@@ -192,7 +176,6 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    // fontWeight: "bold",
   },
   productPrice: {
     fontSize: 14,

@@ -9,21 +9,19 @@ const SearchResultScreen = ({ route }) => {
       <Text style={styles.title}>
         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
       </Text>
-      <ScrollView>
-        <View style={styles.searchresultContainer}>
-          <FlatList
-            data={filteredProducts}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.productItem}>
-                <Text style={styles.productName}>{item.n}</Text>
-                <Text style={styles.productPrice}>€{item.p}</Text>
-                {/* <Text style={styles.supermarketName}>{item.supermarket}</Text> */}
-              </View>
-            )}
-          />
-        </View>
-      </ScrollView>
+      <View style={styles.searchresultContainer}>
+        <FlatList
+          data={filteredProducts}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.productItem}>
+              <Text style={styles.productName}>{item.n}</Text>
+              <Text style={styles.productPrice}>€{item.p}</Text>
+              <Text style={styles.supermarketName}>{item.c}</Text>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 };
@@ -58,16 +56,16 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-	width: "70%",
+    width: "70%",
   },
   productPrice: {
     fontSize: 14,
     color: "#007bff",
   },
-//   supermarketName: {
-//     fontSize: 14,
-//     color: "black", // You can change the color as per your preference
-//   },
+  supermarketName: {
+    fontSize: 14,
+    color: "black", // You can change the color as per your preference
+  },
 });
 
 export default SearchResultScreen;
