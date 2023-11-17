@@ -18,8 +18,8 @@ const CustomHeaderTitle = () => {
       style={{ marginLeft: 20 }}
     >
       <View>
-        <Text>Smart</Text>
-        <Text>Shopper</Text>
+        <Text style={{ color: "#2F6DC3", fontWeight: "bold" }}>Smart</Text>
+        <Text style={{ color: "#C87E61", fontWeight: "bold" }}>Shopper</Text>
       </View>
     </TouchableOpacity>
   );

@@ -21,7 +21,7 @@ function HomeScreen({ navigation }) {
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
     const data = await axios.get("http://localhost:3000/api/data");
-    // console.log("data ya bastard", data);
+
     for (const section of data.data) {
       for (const product of section.d) {
         if (product.n.toLowerCase().includes(searchTextLower)) {
@@ -78,7 +78,6 @@ function HomeScreen({ navigation }) {
       {filteredProducts.length > 0 && (
         <View style={styles.searchdropdownContainer}>
           <FlatList
-            // style={{ position: 'absolute', top: 100, left: 0, right: 0, bottom: 0 }}
             data={filteredProducts.slice(0, 100)}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
@@ -100,17 +99,17 @@ function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 40,
-    marginTop: 80,
-    marginBottom: 80,
-    alignSelf: "flex-start",
-    padding: 20,
-  },
   container: {
-    backgroundColor: "white",
     flex: 1,
     alignItems: "center",
+    backgroundColor: "#f0f0f0", // Adjust the background color
+  },
+  title: {
+    fontSize: 40,
+    marginTop: 50,
+    marginBottom: 50,
+    alignSelf: "flex-start",
+    padding: 20,
   },
   groupButton: {
     flexDirection: "row",
@@ -121,10 +120,10 @@ const styles = StyleSheet.create({
   button: {
     borderStyle: "solid",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 3,
     width: "42%",
     height: 50,
-    backgroundColor: "#6666ff",
+    backgroundColor: "#2F6DC3",
     margin: 10,
     justifyContent: "center",
   },
@@ -142,16 +141,14 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderRadius: 5,
     alignSelf: "center",
-  },
-  productItem: {
-    marginBottom: 10,
+    backgroundColor: "white", // Adjust the background color
   },
   searchdropdownContainer: {
     backgroundColor: "white",
-    borderRadius: 5,
+    borderRadius: 3,
     padding: 10,
     position: "absolute",
-    top: 380,
+    top: 310,
     zIndex: 1,
     width: "90%",
     borderColor: "gray",
@@ -167,7 +164,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: "90%",
     backgroundColor: "white",
-    borderRadius: 5,
+    borderRadius: 3,
     borderStyle: "solid",
     borderColor: "darkgray",
     borderWidth: 1,
