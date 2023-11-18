@@ -1,183 +1,60 @@
-// // import React from "react";
-// // import { View, Text, FlatList, ScrollView, StyleSheet } from "react-native";
-
-// // const SearchResultScreen = ({ route }) => {
-// //   const { searchText, filteredProducts } = route.params;
-
-// //   return (
-// //     <View>
-// //       <Text style={styles.title}>
-// //         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
-// //       </Text>
-// //       <View style={styles.searchresultContainer}>
-// //         <FlatList
-// //           data={filteredProducts}
-// //           keyExtractor={(item, index) => index.toString()}
-// //           renderItem={({ item }) => (
-// //             <View style={styles.productItem}>
-// //               <Text style={styles.productName}>{item.n}</Text>
-// //               <Text style={styles.productPrice}>€{item.p}</Text>
-// //               <Text style={styles.supermarketName}>{item.c}</Text>
-// //             </View>
-// //           )}
-// //         />
-// //       </View>
-// //     </View>
-// //   );
-// // };
-
-// // const styles = StyleSheet.create({
-// //   title: {
-// //     fontSize: 20,
-// //     // textAlign: "center",
-// //     marginTop: 20,
-// //     padding: 20,
-// //   },
-// //   boldText: {
-// //     fontWeight: "bold",
-// //   },
-// //   searchresultContainer: {
-// //     backgroundColor: "white",
-// //     borderRadius: 5,
-// //     padding: 10,
-// //     marginTop: 10,
-// //     width: "90%",
-// //     borderColor: "gray",
-// //     borderWidth: 1,
-// //     alignSelf: "center",
-// //     height: "70%",
-// //   },
-// //   productItem: {
-// //     flexDirection: "row",
-// //     justifyContent: "space-between",
-// //     marginBottom: 10,
-// //     borderBottomWidth: 1,
-// //     borderColor: "gray",
-// //   },
-// //   productName: {
-// //     fontSize: 16,
-// //     width: "70%",
-// //   },
-// //   productPrice: {
-// //     fontSize: 14,
-// //     color: "#007bff",
-// //   },
-// //   supermarketName: {
-// //     fontSize: 14,
-// //     color: "black", // You can change the color as per your preference
-// //   },
-// // });
-
-// // export default SearchResultScreen;
-
-// import React, { useState } from "react";
-// import { View, Text, FlatList, StyleSheet } from "react-native";
-// import { SearchBar } from "react-native-elements"; // Adjust the import based on your library
-
-// const SearchResultScreen = ({ route }) => {
-//   const { searchText, filteredProducts } = route.params;
-//   const [searchInput, setSearchInput] = useState("");
-
-//   return (
-//     <View>
-//       <SearchBar
-//         placeholder="Search..."
-//         onChangeText={(text) => setSearchInput(text)}
-//         value={searchInput}
-//       />
-//       <Text style={styles.title}>
-//         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
-//       </Text>
-//       <View style={styles.searchresultContainer}>
-//         <FlatList
-//           data={filteredProducts}
-//           keyExtractor={(item, index) => index.toString()}
-//           renderItem={({ item }) => (
-//             <View style={styles.productItem}>
-//               {/* Display product image here */}
-//               <View style={{ flex: 1 }}>
-//                 <Text style={styles.productName}>{item.n}</Text>
-//                 <Text style={styles.productPrice}>€{item.p}</Text>
-//                 <Text style={styles.supermarketName}>{item.c}</Text>
-//               </View>
-//               <View>
-//                 {/* Add to List button */}
-//                 <Text>Add to List</Text>
-//               </View>
-//             </View>
-//           )}
-//         />
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   title: {
-//     fontSize: 20,
-//     marginTop: 20,
-//     padding: 20,
-//   },
-//   boldText: {
-//     fontWeight: "bold",
-//   },
-//   searchresultContainer: {
-//     backgroundColor: "white",
-//     borderRadius: 5,
-//     padding: 10,
-//     marginTop: 10,
-//     width: "90%",
-//     borderColor: "gray",
-//     borderWidth: 1,
-//     alignSelf: "center",
-//     height: "70%",
-//   },
-//   productItem: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     marginBottom: 10,
-//     borderBottomWidth: 1,
-//     borderColor: "gray",
-//   },
-//   productName: {
-//     fontSize: 16,
-//   },
-//   productPrice: {
-//     fontSize: 14,
-//     color: "#007bff",
-//   },
-// });
-
-// export default SearchResultScreen;
 import React, { useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import axios from "axios";
 import { SearchBar, Card, Button } from "react-native-elements";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SearchResultScreen = ({ route, navigation }) => {
-  const [searchText, setSearchText] = useState("");
-  const { filteredProducts } = route.params;
+  const { searchedText, products } = route.params;
+  const [searchText, setSearchText] = useState(searchedText);
+  const [filteredProducts, setFilteredProducts] = useState(products);
 
-  const handleSearch = (text) => {
+  const handleSearch = async (text) => {
     setSearchText(text);
+
+    const searchTextLower = text.toLowerCase();
+    const filteredItems = [];
+    const data = await axios.get("http://localhost:3000/api/data");
+
+    for (const section of data.data) {
+      for (const product of section.d) {
+        if (product.n.toLowerCase().includes(searchTextLower)) {
+          filteredItems.push({ n: product.n, p: product.p, c: section.n });
+        }
+      }
+    }
+
+    if (text.trim() === "") {
+      setFilteredProducts([]);
+      return;
+    }
+
+    setFilteredProducts(filteredItems);
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <SearchBar
-        placeholder="Search for an item"
-        onChangeText={handleSearch}
-        value={searchText}
+        placeholder="Search for an item ..."
+        onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
           if (searchText.trim() !== "") {
+            // Navigate to SearchScreen only if the search text is not empty
             navigation.navigate("SearchResult", {
               searchText,
               filteredProducts,
             });
           }
         }}
-        containerStyle={styles.searchBarContainer}
-        inputContainerStyle={styles.searchBarInput}
+        value={searchText}
       />
+
       <Text style={styles.title}>
         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
       </Text>
@@ -186,33 +63,41 @@ const SearchResultScreen = ({ route, navigation }) => {
           data={filteredProducts}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <Card containerStyle={styles.cardContainer}>
-              {/* Top part of the card for the picture */}
-              {/* Replace 'item.image' with the actual property for the image */}
-              <Card.Image
-                source={{ uri: item.image }}
-                style={styles.cardImage}
-              />
-
-              {/* Top left on the picture: Name of the supermarket */}
-              <Text style={styles.supermarketName}>{item.c.toUpperCase()}</Text>
-
-              {/* Below the picture to the left: Name of the item */}
-              <Text style={styles.productName}>{item.n}</Text>
-
-              {/* Price of the item */}
-              <Text style={styles.productPrice}>€{item.p}</Text>
-
-              {/* Very bottom part of the card: Add to List button */}
-              <Button
-                title="+"
-                onPress={() => {
-                  // Your logic for adding to the list
-                  console.log("Add to list clicked");
-                }}
-                buttonStyle={styles.addButton}
-              />
-            </Card>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("ItemScreen", { item });
+              }}
+              style={styles.cardContainer}
+            >
+              <Card containerStyle={styles.card}>
+                {/* Top part of the card for the picture */}
+                <Card.Image
+                  source={{ uri: item.image }}
+                  style={styles.cardImage}
+                />
+                {/* Top left on the picture: Name of the supermarket */}
+                <Text style={styles.supermarketName}>
+                  {item.c.toUpperCase()}
+                </Text>
+                <View style={styles.infoNamePrice}>
+                  {/* Below the picture to the left: Name of the item */}
+                  <Text style={styles.productName}>{item.n}</Text>
+                  {/* Bottom of the card: Price and Add to List button */}
+                  <View style={styles.bottomContainer}>
+                    <Text style={styles.productPrice}>€{item.p}</Text>
+                  </View>
+                </View>
+                <Button
+                  style={styles.bottomAddButton}
+                  title="+ Add to list"
+                  onPress={() => {
+                    // Logic for adding to the list
+                    console.log("Add to list clicked");
+                  }}
+                  buttonStyle={styles.addButton}
+                />
+              </Card>
+            </TouchableOpacity>
           )}
         />
       </View>
@@ -221,10 +106,15 @@ const SearchResultScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // container: {
+  //   flex: 1,
+  //   alignItems: "center",
+  //   backgroundColor: "#B9C4BF", // Adjust the background color
+  // },
   title: {
     fontSize: 20,
-    // marginTop: 20,
-    padding: 20,
+    paddingLeft: 20,
+    marginBottom: 5,
   },
   boldText: {
     fontWeight: "bold",
@@ -242,31 +132,42 @@ const styles = StyleSheet.create({
     // marginTop: 10,
     width: "90%",
     alignSelf: "center",
+    // flexDirection: "row",
   },
   cardContainer: {
-    marginBottom: 5,
+    marginBottom: 1,
     // width: "40%",
+  },
+  card: {
+    borderRadius: 5,
   },
   cardImage: {
     height: 200, // Set the height of the image as needed
+    borderRadius: 5,
   },
   supermarketName: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    fontSize: 16,
-    fontWeight: "bold",
+    top: 5,
+    left: 5,
+    fontSize: 10,
+    // fontWeight: "bold",
     color: "white", // Adjust the color as per your design
   },
+  infoNamePrice: {
+    flexDirection: "row",
+  },
   productName: {
-    fontSize: 16,
+    fontSize: 14,
     marginTop: 10,
+    width: "88%",
   },
   productPrice: {
-    fontSize: 14,
+    marginTop: 10,
+    fontSize: 12,
     color: "#007bff",
+    alignSelf: "flex-end",
   },
-  addButton: {
+  bottomAddButton: {
     marginTop: 10,
     backgroundColor: "#007bff", // Adjust the color as per your design
   },

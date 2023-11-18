@@ -61,14 +61,14 @@ function HomeScreen({ navigation }) {
 
       <TextInput
         style={styles.searchBar}
-        placeholder="Search for an item"
+        placeholder="Search for an item ..."
         onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
           if (searchText.trim() !== "") {
             // Navigate to SearchScreen only if the search text is not empty
             navigation.navigate("SearchResult", {
-              searchText,
-              filteredProducts,
+              searchedText: searchText,
+              products: filteredProducts,
             });
           }
         }}
@@ -82,8 +82,14 @@ function HomeScreen({ navigation }) {
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.productItem}>
-                <Text style={styles.productName}>{item.n}</Text>
-                <Text style={styles.productPrice}>Price: €{item.p}</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("ItemScreen", { item });
+                  }}
+                  style={styles.productItem}
+                >
+                  <Text style={styles.productName}>{item.n}</Text>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -106,8 +112,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 40,
-    marginTop: 50,
-    marginBottom: 50,
+    marginTop: 40,
+    marginBottom: 40,
     alignSelf: "flex-start",
     padding: 20,
   },
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
     width: "90%",
     height: 40,
     borderColor: "gray",
-    borderWidth: 1,
+    borderWidth: 0.2,
     marginTop: 10,
     marginBottom: 10,
     paddingLeft: 10,
@@ -144,21 +150,22 @@ const styles = StyleSheet.create({
     backgroundColor: "white", // Adjust the background color
   },
   searchdropdownContainer: {
-    backgroundColor: "white",
+    backgroundColor: "#E0E7E7",
+    color: "white",
     borderRadius: 3,
     padding: 10,
     position: "absolute",
-    top: 310,
+    top: 290,
     zIndex: 1,
     width: "90%",
     borderColor: "gray",
-    borderWidth: 1,
     alignSelf: "center",
+    display: "flex",
   },
   productItem: {
     marginBottom: 10,
-    borderBottomWidth: 1,
     borderColor: "gray",
+    padding: 2,
   },
   dealsContainer: {
     marginTop: 10,
@@ -174,10 +181,11 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 16,
   },
-  productPrice: {
-    fontSize: 14,
-    color: "#007bff",
-  },
+
+  // productPrice: {
+  //   fontSize: 14,
+  //   color: "#007bff",
+  // },
 });
 
 export default HomeScreen;
