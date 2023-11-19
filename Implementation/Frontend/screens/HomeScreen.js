@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  TextInput,
   Text,
   StyleSheet,
   FlatList,
@@ -61,7 +60,9 @@ function HomeScreen({ navigation }) {
       </View>
 
       <SearchBar
-        style={styles.searchBar}
+        inputContainerStyle={styles.searchinputcontainer}
+        containerStyle={styles.searchcontainer}
+        inputStyle={styles.searchinput}
         placeholder="Search for an item ..."
         onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
@@ -108,7 +109,6 @@ function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: "center",
     backgroundColor: "#f0f0f0", // Adjust the background color
   },
   title: {
@@ -138,21 +138,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
   },
-  // searchBar: {
-  //   width: "90%",
-  //   height: 40,
-  //   borderColor: "gray",
-  //   borderWidth: 0.2,
-  //   marginTop: 10,
-  //   marginBottom: 10,
-  //   paddingLeft: 10,
-  //   borderRadius: 5,
-  //   alignSelf: "center",
-  //   backgroundColor: "white", // Adjust the background color
-  // },
+  searchcontainer: {
+    backgroundColor: "#E2E8EE",
+    border: 0,
+    color: "black",
+  },
+  searchinputcontainer: {
+    backgroundColor: "#BEC5CE",
+  },
+  searchinput: {
+    color: "black",
+  },
   searchdropdownContainer: {
-    backgroundColor: "#3A3E42",
-    color: "white",
+    backgroundColor: "#E2E8EE",
     borderRadius: 3,
     padding: 10,
     position: "absolute",
@@ -162,8 +160,6 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     alignSelf: "center",
     display: "flex",
-    // color: "white",
-    color: "white",
   },
   productItem: {
     marginBottom: 10,
@@ -184,13 +180,8 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    color: "white",
+    color: "black", //search text color
   },
-
-  // productPrice: {
-  //   fontSize: 14,
-  //   color: "#007bff",
-  // },
 });
 
 export default HomeScreen;

@@ -42,7 +42,9 @@ const SearchResultScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       {/* Search Bar */}
       <SearchBar
-        style={styles.searchbar}
+        inputContainerStyle={styles.searchinputcontainer}
+        containerStyle={styles.searchcontainer}
+        inputStyle={styles.searchinput}
         placeholder="Search for an item ..."
         onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
@@ -128,38 +130,33 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
-    // backgroundColor: "#007bff",
   },
-  // searchbar: {
-  //   width: "90%",
-  //   height: 40,
-  //   borderColor: "gray",
-  //   borderWidth: 0.2,
-  //   marginTop: 10,
-  //   marginBottom: 10,
-  //   paddingLeft: 10,
-  //   borderRadius: 5,
-  //   alignSelf: "center",
-  //   backgroundColor: "white", // Adjust the background color
-  // },
+  searchcontainer: {
+    backgroundColor: "#E2E8EE",
+    border: 0,
+    color: "black",
+  },
+  searchinputcontainer: {
+    backgroundColor: "#BEC5CE",
+  },
+  searchinput: {
+    color: "black",
+  },
   searchBarInput: {
     backgroundColor: "#e0e0e0",
   },
   searchresultContainer: {
-    // marginTop: 10,
     width: "90%",
     alignSelf: "center",
-    // flexDirection: "row",
   },
   cardContainer: {
     marginBottom: 1,
-    // width: "40%",
   },
   card: {
     borderRadius: 5,
   },
   cardImage: {
-    height: 200, // Set the height of the image as needed
+    height: 200, // height of the image
     borderRadius: 5,
   },
   supermarketName: {
@@ -167,8 +164,7 @@ const styles = StyleSheet.create({
     top: 5,
     left: 5,
     fontSize: 10,
-    // fontWeight: "bold",
-    color: "white", // Adjust the color as per your design
+    color: "white",
   },
   infoNamePrice: {
     flexDirection: "row",
@@ -186,7 +182,7 @@ const styles = StyleSheet.create({
   },
   bottomAddButton: {
     marginTop: 10,
-    backgroundColor: "#007bff", // Adjust the color as per your design
+    backgroundColor: "#007bff",
   },
 });
 
