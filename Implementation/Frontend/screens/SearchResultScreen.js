@@ -5,10 +5,10 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card, Button } from "react-native-elements";
-import { useFocusEffect } from "@react-navigation/native";
 
 const SearchResultScreen = ({ route, navigation }) => {
   const { searchedText, products } = route.params;
@@ -40,7 +40,9 @@ const SearchResultScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Search Bar */}
       <SearchBar
+        style={styles.searchbar}
         placeholder="Search for an item ..."
         onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
@@ -54,7 +56,6 @@ const SearchResultScreen = ({ route, navigation }) => {
         }}
         value={searchText}
       />
-
       <Text style={styles.title}>
         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
       </Text>
@@ -106,15 +107,18 @@ const SearchResultScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   alignItems: "center",
-  //   backgroundColor: "#B9C4BF", // Adjust the background color
-  // },
+  container: {
+    flex: 1,
+    // backgroundColor: "#B9C4BF", // Adjust the background color
+  },
+  searchbar: {
+    // backgroundColor: "#B9C4BF",
+  },
   title: {
     fontSize: 20,
     paddingLeft: 20,
     marginBottom: 5,
+    marginTop: 5,
   },
   boldText: {
     fontWeight: "bold",
@@ -124,7 +128,20 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
+    // backgroundColor: "#007bff",
   },
+  // searchbar: {
+  //   width: "90%",
+  //   height: 40,
+  //   borderColor: "gray",
+  //   borderWidth: 0.2,
+  //   marginTop: 10,
+  //   marginBottom: 10,
+  //   paddingLeft: 10,
+  //   borderRadius: 5,
+  //   alignSelf: "center",
+  //   backgroundColor: "white", // Adjust the background color
+  // },
   searchBarInput: {
     backgroundColor: "#e0e0e0",
   },

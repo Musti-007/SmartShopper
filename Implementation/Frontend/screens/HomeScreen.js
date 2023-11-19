@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import { FontAwesome } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { SearchBar } from "react-native-elements";
 
 function HomeScreen({ navigation }) {
   const [searchText, setSearchText] = useState("");
@@ -59,7 +60,7 @@ function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <TextInput
+      <SearchBar
         style={styles.searchBar}
         placeholder="Search for an item ..."
         onChangeText={(text) => handleSearch(text)}
@@ -107,7 +108,7 @@ function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    // alignItems: "center",
     backgroundColor: "#f0f0f0", // Adjust the background color
   },
   title: {
@@ -137,30 +138,32 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
   },
-  searchBar: {
-    width: "90%",
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 0.2,
-    marginTop: 10,
-    marginBottom: 10,
-    paddingLeft: 10,
-    borderRadius: 5,
-    alignSelf: "center",
-    backgroundColor: "white", // Adjust the background color
-  },
+  // searchBar: {
+  //   width: "90%",
+  //   height: 40,
+  //   borderColor: "gray",
+  //   borderWidth: 0.2,
+  //   marginTop: 10,
+  //   marginBottom: 10,
+  //   paddingLeft: 10,
+  //   borderRadius: 5,
+  //   alignSelf: "center",
+  //   backgroundColor: "white", // Adjust the background color
+  // },
   searchdropdownContainer: {
-    backgroundColor: "#E0E7E7",
+    backgroundColor: "#3A3E42",
     color: "white",
     borderRadius: 3,
     padding: 10,
     position: "absolute",
-    top: 290,
+    top: 302,
     zIndex: 1,
-    width: "90%",
+    width: "100%",
     borderColor: "gray",
     alignSelf: "center",
     display: "flex",
+    // color: "white",
+    color: "white",
   },
   productItem: {
     marginBottom: 10,
@@ -177,9 +180,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     height: "40%",
+    alignSelf: "center",
   },
   productName: {
     fontSize: 16,
+    color: "white",
   },
 
   // productPrice: {
