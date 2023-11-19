@@ -15,7 +15,7 @@ const ItemScreen = ({ route }) => {
       >
         <Text style={styles.backButtonText}>{"< Back"}</Text>
       </TouchableOpacity>
-      <Card style={styles.card}>
+      <Card containerStyle={styles.card}>
         {/* Top part of the card for the picture */}
         <Card.Image source={{ uri: item.image }} style={styles.cardImage} />
         {/* Top left on the picture: Name of the supermarket */}
@@ -45,7 +45,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    // backgroundColor: "#B9C4BF", // Adjust the background color
   },
   backButton: {
     top: 10,
@@ -59,8 +58,10 @@ const styles = StyleSheet.create({
     color: "#007bff",
   },
   card: {
-    marginTop: 60,
+    width: "90%", // Set a fixed width for the card
     borderRadius: 5,
+    overflow: "hidden", // Ensure the image stays within the card boundaries
+    marginTop: 60,
   },
   cardImage: {
     height: 200,
