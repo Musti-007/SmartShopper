@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  TextInput,
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card, Button } from "react-native-elements";
@@ -40,7 +39,6 @@ const SearchResultScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
       <SearchBar
         inputContainerStyle={styles.searchinputcontainer}
         containerStyle={styles.searchcontainer}
@@ -49,7 +47,6 @@ const SearchResultScreen = ({ route, navigation }) => {
         onChangeText={(text) => handleSearch(text)}
         onSubmitEditing={() => {
           if (searchText.trim() !== "") {
-            // Navigate to SearchScreen only if the search text is not empty
             navigation.navigate("SearchResult", {
               searchText,
               filteredProducts,
@@ -65,6 +62,7 @@ const SearchResultScreen = ({ route, navigation }) => {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item, index) => index.toString()}
+          numColumns={2}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
@@ -73,28 +71,21 @@ const SearchResultScreen = ({ route, navigation }) => {
               style={styles.cardContainer}
             >
               <Card containerStyle={styles.card}>
-                {/* Top part of the card for the picture */}
                 <Card.Image
                   source={{ uri: item.image }}
                   style={styles.cardImage}
                 />
-                {/* Top left on the picture: Name of the supermarket */}
+                <View style={styles.infoNamePrice}>
+                  <Text style={styles.productName}>{item.n}</Text>
+                  <Text style={styles.productPrice}>€{item.p}</Text>
+                </View>
                 <Text style={styles.supermarketName}>
                   {item.c.toUpperCase()}
                 </Text>
-                <View style={styles.infoNamePrice}>
-                  {/* Below the picture to the left: Name of the item */}
-                  <Text style={styles.productName}>{item.n}</Text>
-                  {/* Bottom of the card: Price and Add to List button */}
-                  <View style={styles.bottomContainer}>
-                    <Text style={styles.productPrice}>€{item.p}</Text>
-                  </View>
-                </View>
                 <Button
                   style={styles.bottomAddButton}
                   title="+ Add to list"
                   onPress={() => {
-                    // Logic for adding to the list
                     console.log("Add to list clicked");
                   }}
                   buttonStyle={styles.addButton}
@@ -111,10 +102,6 @@ const SearchResultScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: "#B9C4BF", // Adjust the background color
-  },
-  searchbar: {
-    // backgroundColor: "#B9C4BF",
   },
   title: {
     fontSize: 20,
@@ -142,21 +129,21 @@ const styles = StyleSheet.create({
   searchinput: {
     color: "black",
   },
-  searchBarInput: {
-    backgroundColor: "#e0e0e0",
-  },
   searchresultContainer: {
     width: "90%",
     alignSelf: "center",
   },
   cardContainer: {
-    marginBottom: 1,
+    marginBottom: 10,
+    flex: 1,
+    margin: 5,
   },
   card: {
     borderRadius: 5,
+    height: "100%",
   },
   cardImage: {
-    height: 200, // height of the image
+    height: 100,
     borderRadius: 5,
   },
   supermarketName: {
@@ -167,21 +154,26 @@ const styles = StyleSheet.create({
     color: "white",
   },
   infoNamePrice: {
-    flexDirection: "row",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    flex: 1,
   },
   productName: {
     fontSize: 14,
     marginTop: 10,
-    width: "88%",
   },
   productPrice: {
-    marginTop: 10,
     fontSize: 12,
     color: "#007bff",
     alignSelf: "flex-end",
+    marginBottom: 10,
   },
   bottomAddButton: {
-    marginTop: 10,
+    backgroundColor: "#007bff",
+    position: "absolute",
+    marginBottom: 10,
+  },
+  addButton: {
     backgroundColor: "#007bff",
   },
 });
