@@ -75,10 +75,10 @@ const SearchResultScreen = ({ route, navigation }) => {
                   source={{ uri: item.image }}
                   style={styles.cardImage}
                 />
-                <View style={styles.infoNamePrice}>
-                  <Text style={styles.productName}>{item.n}</Text>
-                  <Text style={styles.productPrice}>€{item.p}</Text>
-                </View>
+
+                <Text style={styles.productName}>{item.n}</Text>
+                <Text style={styles.productPrice}>€{item.p}</Text>
+
                 <Text style={styles.supermarketName}>
                   {item.c.toUpperCase()}
                 </Text>
@@ -134,13 +134,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   cardContainer: {
-    marginBottom: 10,
+    marginBottom: 2,
     flex: 1,
-    margin: 5,
+    // margin: 5,
   },
   card: {
     borderRadius: 5,
-    height: "100%",
+    height: 300,
+    margin: 1,
   },
   cardImage: {
     height: 100,
@@ -154,9 +155,9 @@ const styles = StyleSheet.create({
     color: "white",
   },
   infoNamePrice: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    flex: 1,
+    // flexDirection: "column",
+    // justifyContent: "space-between",
+    // flex: 1,
   },
   productName: {
     fontSize: 14,
@@ -170,8 +171,6 @@ const styles = StyleSheet.create({
   },
   bottomAddButton: {
     backgroundColor: "#007bff",
-    position: "absolute",
-    marginBottom: 10,
   },
   addButton: {
     backgroundColor: "#007bff",

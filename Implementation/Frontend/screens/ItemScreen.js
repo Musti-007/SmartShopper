@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   cardImage: {
-    height: 200,
+    height: 300,
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
   },

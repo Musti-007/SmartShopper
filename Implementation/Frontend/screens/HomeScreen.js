@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
   searchcontainer: {
     backgroundColor: "#E2E8EE",
     border: 0,
-    color: "black",
   },
   searchinputcontainer: {
     backgroundColor: "#BEC5CE",
