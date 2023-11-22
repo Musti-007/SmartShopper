@@ -21,11 +21,17 @@ function HomeScreen({ navigation }) {
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
     const data = await axios.get("http://localhost:3000/api/data");
+    console.log("Data result: ", data.data);
 
     for (const section of data.data) {
       for (const product of section.d) {
         if (product.n.toLowerCase().includes(searchTextLower)) {
-          filteredItems.push({ n: product.n, p: product.p, c: section.n });
+          filteredItems.push({
+            n: product.n,
+            p: product.p,
+            c: section.c,
+            i: section.i,
+          });
         }
       }
     }
@@ -36,6 +42,10 @@ function HomeScreen({ navigation }) {
     }
 
     setFilteredProducts(filteredItems);
+  };
+
+  const handleCreateListButtonPress = () => {
+    navigation.navigate("CreateList"); // Navigate to the CreateListScreen
   };
 
   useFocusEffect(
@@ -54,7 +64,10 @@ function HomeScreen({ navigation }) {
           <Text style={styles.buttonText}>List</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleCreateListButtonPress}
+        >
           <Text style={styles.buttonText}>Create List</Text>
         </TouchableOpacity>
       </View>
@@ -137,6 +150,7 @@ const styles = StyleSheet.create({
   buttonText: {
     textAlign: "center",
     color: "white",
+    fontSize: 16,
   },
   searchcontainer: {
     backgroundColor: "#E2E8EE",
