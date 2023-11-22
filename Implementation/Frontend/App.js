@@ -7,6 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import SearchResultScreen from "./screens/SearchResultScreen";
 import ItemScreen from "./screens/ItemScreen";
+import CreateListScreen from "./screens/CreateListScreen";
 
 const Stack = createStackNavigator();
 
@@ -49,7 +50,8 @@ export default function App() {
       >
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="SearchResult" component={SearchResultScreen} />
-        <Stack.Screen name="ItemScreen" component={ItemScreen} />
+        <Stack.Screen name="Item" component={ItemScreen} />
+        <Stack.Screen name="CreateList" component={CreateListScreen} />
         {/* Add ItemScreen */}
       </Stack.Navigator>
     </NavigationContainer>
