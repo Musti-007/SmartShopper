@@ -1,3 +1,131 @@
+// import React, { useState } from "react";
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   FlatList,
+//   TouchableOpacity,
+// } from "react-native";
+// import axios from "axios";
+// import { SearchBar, Card, Button } from "react-native-elements";
+// import DropDown from "react-native-dropdown-autocomplete";
+
+// const SearchResultScreen = ({ route, navigation }) => {
+//   const { searchedText, products } = route.params;
+//   const [searchText, setSearchText] = useState(searchedText);
+//   const [filteredProducts, setFilteredProducts] = useState(products);
+//   const [selectedFilter, setSelectedFilter] = useState("supermarket");
+
+//   const handleSearch = async (text) => {
+//     setSearchText(text);
+
+//     const searchTextLower = text.toLowerCase();
+//     const filteredItems = [];
+//     const data = await axios.get("http://localhost:3000/api/data");
+
+//     for (const section of data.data) {
+//       for (const product of section.d) {
+//         if (product.n.toLowerCase().includes(searchTextLower)) {
+//           filteredItems.push({
+//             n: product.n,
+//             p: product.p,
+//             c: section.c,
+//             i: section.i,
+//           });
+//         }
+//       }
+//     }
+//     if (text.trim() === "") {
+//       setFilteredProducts([]);
+//       return;
+//     }
+//     setFilteredProducts(filteredItems);
+//   };
+//   const handleFilterChange = (filter) => {
+//     setSelectedFilter(filter);
+//     // Logic to sort the data based on the selected filter
+//     let sortedProducts = [...filteredProducts];
+//     if (filter === "supermarket") {
+//       sortedProducts.sort((a, b) => a.c.localeCompare(b.c));
+//     } else if (filter === "price") {
+//       sortedProducts.sort((a, b) => a.p - b.p);
+//     } else if (filter === "name") {
+//       sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
+//     }
+//     setFilteredProducts(sortedProducts);
+//   };
+//   return (
+//     <View style={styles.container}>
+//       <SearchBar
+//         inputContainerStyle={styles.searchinputcontainer}
+//         containerStyle={styles.searchcontainer}
+//         inputStyle={styles.searchinput}
+//         placeholder="Search for an item ..."
+//         onChangeText={(text) => handleSearch(text)}
+//         onSubmitEditing={() => {
+//           if (searchText.trim() !== "") {
+//             navigation.navigate("SearchResult", {
+//               searchText,
+//               filteredProducts,
+//             });
+//           }
+//         }}
+//         value={searchText}
+//       />
+//       <Text style={styles.title}>
+//         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
+//       </Text>
+//       <View style={styles.filterContainer}>
+//         <DropDown
+//           placeholder="Filter"
+//           style={styles.unknown}
+//           dropDownStyle={styles.dropdown}
+//           onChangeItem={(item) => handleFilterChange(item.value)}
+//           items={[
+//             { label: "Sort by Supermarket", value: "supermarket" },
+//             { label: "Sort by Price", value: "price" },
+//             { label: "Sort by Name", value: "name" },
+//           ]}
+//         />
+//         //{" "}
+//       </View>
+//       <View style={styles.searchresultContainer}>
+//         <FlatList
+//           data={filteredProducts}
+//           keyExtractor={(item, index) => index.toString()}
+//           numColumns={2}
+//           renderItem={({ item }) => (
+//             <TouchableOpacity
+//               style={styles.cardContainer}
+//               onPress={() => {
+//                 navigation.navigate("Item", { item });
+//               }}
+//             >
+//               <Card containerStyle={styles.card}>
+//                 <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
+
+//                 <View style={styles.namepricebox}>
+//                   <Text style={styles.productName}>{item.n}</Text>
+//                   <Text style={styles.productPrice}>€{item.p}</Text>
+//                 </View>
+
+//                 <Text style={styles.supermarketName}>{item.c}</Text>
+//                 <Button
+//                   style={styles.bottomAddButton}
+//                   title={"+ Add to list"}
+//                   onPress={() => {
+//                     console.log("Add to list clicked");
+//                   }}
+//                 />
+//               </Card>
+//             </TouchableOpacity>
+//           )}
+//         />
+//       </View>
+//     </View>
+//   );
+// };
+
 import React, { useState } from "react";
 import {
   View,
@@ -8,11 +136,13 @@ import {
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card, Button } from "react-native-elements";
+import Select from "react-select";
 
 const SearchResultScreen = ({ route, navigation }) => {
   const { searchedText, products } = route.params;
   const [searchText, setSearchText] = useState(searchedText);
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedFilter, setSelectedFilter] = useState("supermarket");
 
   const handleSearch = async (text) => {
     setSearchText(text);
@@ -40,6 +170,20 @@ const SearchResultScreen = ({ route, navigation }) => {
     setFilteredProducts(filteredItems);
   };
 
+  const handleFilterChange = (selectedOption) => {
+    setSelectedFilter(selectedOption.value);
+    // Logic to sort the data based on the selected filter
+    let sortedProducts = [...filteredProducts];
+    if (selectedOption.value === "supermarket") {
+      sortedProducts.sort((a, b) => a.c.localeCompare(b.c));
+    } else if (selectedOption.value === "price") {
+      sortedProducts.sort((a, b) => a.p - b.p);
+    } else if (selectedOption.value === "name") {
+      sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
+    }
+    setFilteredProducts(sortedProducts);
+  };
+
   return (
     <View style={styles.container}>
       <SearchBar
@@ -61,6 +205,17 @@ const SearchResultScreen = ({ route, navigation }) => {
       <Text style={styles.title}>
         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
       </Text>
+      <View style={styles.filterContainer}>
+        <Select
+          options={[
+            { value: "supermarket", label: "Sort by Supermarket" },
+            { value: "price", label: "Sort by Price" },
+            { value: "name", label: "Sort by Name" },
+          ]}
+          value={{ value: selectedFilter, label: `Sort by ${selectedFilter}` }}
+          onChange={handleFilterChange}
+        />
+      </View>
       <View style={styles.searchresultContainer}>
         <FlatList
           data={filteredProducts}
@@ -68,10 +223,10 @@ const SearchResultScreen = ({ route, navigation }) => {
           numColumns={2}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("ItemScreen", { item });
-              }}
               style={styles.cardContainer}
+              onPress={() => {
+                navigation.navigate("Item", { item });
+              }}
             >
               <Card containerStyle={styles.card}>
                 <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
@@ -132,6 +287,11 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
   cardContainer: {
     marginBottom: 2,
     flex: 1,
@@ -173,14 +333,18 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderWidth: 1,
     borderRadius: 3,
-    // height: 50,
     backgroundColor: "#2F6DC3",
     justifyContent: "center",
   },
-  // buttonText: {
-  //   textAlign: "center",
-  //   color: "white",
-  // },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginVertical: 10,
+    zIndex: 1,
+    marginRight: 22,
+  },
+  unknown: { marginHorizontal: 10 },
+  dropdown: { backgroundColor: "#fafafa" },
 });
 
 export default SearchResultScreen;
