@@ -24,16 +24,19 @@ const SearchResultScreen = ({ route, navigation }) => {
     for (const section of data.data) {
       for (const product of section.d) {
         if (product.n.toLowerCase().includes(searchTextLower)) {
-          filteredItems.push({ n: product.n, p: product.p, c: section.n });
+          filteredItems.push({
+            n: product.n,
+            p: product.p,
+            c: section.c,
+            i: section.i,
+          });
         }
       }
     }
-
     if (text.trim() === "") {
       setFilteredProducts([]);
       return;
     }
-
     setFilteredProducts(filteredItems);
   };
 
@@ -71,24 +74,20 @@ const SearchResultScreen = ({ route, navigation }) => {
               style={styles.cardContainer}
             >
               <Card containerStyle={styles.card}>
-                <Card.Image
-                  source={{ uri: item.image }}
-                  style={styles.cardImage}
-                />
+                <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
 
-                <Text style={styles.productName}>{item.n}</Text>
-                <Text style={styles.productPrice}>€{item.p}</Text>
+                <View style={styles.namepricebox}>
+                  <Text style={styles.productName}>{item.n}</Text>
+                  <Text style={styles.productPrice}>€{item.p}</Text>
+                </View>
 
-                <Text style={styles.supermarketName}>
-                  {item.c.toUpperCase()}
-                </Text>
+                <Text style={styles.supermarketName}>{item.c}</Text>
                 <Button
                   style={styles.bottomAddButton}
-                  title="+ Add to list"
+                  title={"+ Add to list"}
                   onPress={() => {
                     console.log("Add to list clicked");
                   }}
-                  buttonStyle={styles.addButton}
                 />
               </Card>
             </TouchableOpacity>
@@ -137,27 +136,30 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     flex: 1,
     // margin: 5,
+    justifyContent: "space-between",
   },
   card: {
     borderRadius: 5,
-    height: 300,
-    margin: 1,
+    height: 320,
+    margin: 2,
+    flexDirection: "column",
   },
   cardImage: {
-    height: 100,
+    height: 150,
     borderRadius: 5,
   },
   supermarketName: {
     position: "absolute",
-    top: 5,
-    left: 5,
+    top: 0,
+    left: 0,
     fontSize: 10,
-    color: "white",
+    color: "black",
+    backgroundColor: "#E2E8EE",
+    borderRadius: 3,
+    padding: 2,
   },
-  infoNamePrice: {
-    // flexDirection: "column",
-    // justifyContent: "space-between",
-    // flex: 1,
+  namepricebox: {
+    height: 100,
   },
   productName: {
     fontSize: 14,
@@ -166,15 +168,19 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 12,
     color: "#007bff",
-    alignSelf: "flex-end",
-    marginBottom: 10,
   },
   bottomAddButton: {
-    backgroundColor: "#007bff",
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderRadius: 3,
+    // height: 50,
+    backgroundColor: "#2F6DC3",
+    justifyContent: "center",
   },
-  addButton: {
-    backgroundColor: "#007bff",
-  },
+  // buttonText: {
+  //   textAlign: "center",
+  //   color: "white",
+  // },
 });
 
 export default SearchResultScreen;
