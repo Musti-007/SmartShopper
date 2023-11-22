@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Card, Button } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons";
 
 const ItemScreen = ({ route }) => {
   const { item } = route.params;
@@ -13,11 +14,11 @@ const ItemScreen = ({ route }) => {
         onPress={() => navigation.goBack()}
         style={styles.backButton}
       >
-        <Text style={styles.backButtonText}>{"< Back"}</Text>
+        <AntDesign name="arrowleft" size={24} color="black" />
       </TouchableOpacity>
       <Card containerStyle={styles.card}>
         {/* Top part of the card for the picture */}
-        <Card.Image source={{ uri: item.image }} style={styles.cardImage} />
+        <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
         {/* Top left on the picture: Name of the supermarket */}
         <Text style={styles.supermarketName}>{item.c.toUpperCase()}</Text>
         <View style={styles.infoNamePrice}>
@@ -42,16 +43,15 @@ const ItemScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     alignItems: "center",
-  },
-  backButton: {
-    top: 10,
-    left: 10,
-    alignSelf: "flex-start",
-    zIndex: 1,
-    padding: 10,
   },
   backButtonText: {
     fontSize: 16,
