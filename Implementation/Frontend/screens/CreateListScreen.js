@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card } from "react-native-elements";
+import { AntDesign } from "@expo/vector-icons";
 
 function CreateListScreen({ navigation }) {
   const [listName, setListName] = useState("");
@@ -90,6 +91,12 @@ function CreateListScreen({ navigation }) {
 
   return (
     <View>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+      >
+        <AntDesign name="arrowleft" size={24} color="black" />
+      </TouchableOpacity>
       <Text style={styles.title}>Create Grocery List</Text>
       <TextInput style={styles.listinput} placeholder=" Enter list name" />
       <SearchBar
@@ -144,6 +151,12 @@ function CreateListScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
   title: {
     fontSize: 40,
     marginTop: 40,
