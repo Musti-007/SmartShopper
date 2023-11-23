@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   FlatList,
   StyleSheet,
   TouchableOpacity,
@@ -11,12 +10,37 @@ import {
 import axios from "axios";
 import { SearchBar, Card } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import RNPickerSelect from "react-native-picker-select";
 
 function CreateListScreen({ navigation }) {
   const [listName, setListName] = useState("");
   const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("supermarket");
+
+  const handleFilterChange = (selectedOption) => {
+    setSelectedOption(selectedOption);
+
+    if (filteredProducts.length === 0) {
+      return;
+    }
+
+    let sortedProducts = [...filteredProducts];
+    if (selectedOption === "supermarket") {
+      console.log("Sorting by supermarket");
+      sortedProducts.sort((a, b) => a.supermarket.localeCompare(b.supermarket));
+    } else if (selectedOption === "price") {
+      console.log("Sorting by price");
+      sortedProducts.sort((a, b) => a.p - b.p);
+    } else if (selectedOption === "name") {
+      console.log("Sorting by name");
+      sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
+    }
+    // console.log("Sorted products:", sortedProducts);
+    setFilteredProducts(sortedProducts);
+  };
 
   const handleSearch = async (text) => {
     setItemName(text);
@@ -32,6 +56,7 @@ function CreateListScreen({ navigation }) {
             n: product.n,
             p: product.p,
             i: section.i,
+            supermarket: section.n,
           });
         }
       }
@@ -40,6 +65,16 @@ function CreateListScreen({ navigation }) {
     if (text.trim() === "") {
       setFilteredProducts([]);
       return;
+    }
+    if (selectedOption === "supermarket") {
+      console.log("Sorting by supermarket");
+      filteredItems.sort((a, b) => a.supermarket.localeCompare(b.supermarket));
+    } else if (selectedOption === "price") {
+      console.log("Sorting by price");
+      filteredItems.sort((a, b) => a.p - b.p);
+    } else if (selectedOption === "name") {
+      console.log("Sorting by name");
+      filteredItems.sort((a, b) => a.n.localeCompare(b.n));
     }
 
     setFilteredProducts(filteredItems);
@@ -98,6 +133,15 @@ function CreateListScreen({ navigation }) {
         <AntDesign name="arrowleft" size={24} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Create Grocery List</Text>
+      <RNPickerSelect
+        onValueChange={(value) => handleFilterChange(value)}
+        items={[
+          { label: "Sort by Supermarket", value: "supermarket" },
+          { label: "Sort by Price", value: "price" },
+          { label: "Sort by Name", value: "name" },
+        ]}
+        value={selectedOption} // Set an initial value or a default value
+      />
       <TextInput style={styles.listinput} placeholder=" Enter list name" />
       <SearchBar
         inputContainerStyle={styles.searchinputcontainer}
@@ -114,14 +158,14 @@ function CreateListScreen({ navigation }) {
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => handleItemPress(item)}>
-                <Card style={styles.card}>
+                <View style={styles.card}>
                   <Card.Image
                     source={{ uri: item.i }}
                     style={styles.cardImage}
                   />
                   <Text style={styles.productName}>{item.n}</Text>
                   <Text style={styles.productPrice}>€{item.p}</Text>
-                </Card>
+                </View>
               </TouchableOpacity>
             )}
           />
@@ -136,7 +180,9 @@ function CreateListScreen({ navigation }) {
               <Text style={styles.itemText}>{item.name}</Text>
               <TouchableOpacity onPress={() => onDeleteItem(index)}>
                 <View style={styles.deleteButton}>
-                  <Text style={styles.deleteButtonText}>x</Text>
+                  <Text style={styles.deleteButtonText}>
+                    <FontAwesome name="trash" size={24} color="red" />
+                  </Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -191,9 +237,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: "100%",
     borderColor: "gray",
-    flexDirection: "row",
-    // alignSelf: "center",
-    // display: "flex",
+    display: "flex",
   },
 
   listItem: {
@@ -208,35 +252,41 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   deleteButton: {
-    backgroundColor: "red",
-    // padding: 8,
+    // backgroundColor: "gray",
+    height: 25,
+    width: 25,
     borderRadius: 5,
   },
   deleteButtonText: {
     color: "white",
-    padding: 8,
+    paddingTop: 2,
+    textAlign: "center",
   },
   card: {
-    height: 320,
     margin: 2,
-    // flexDirection: "row",
+    flexDirection: "row",
     borderRadius: 5,
+    borderbottom: 1,
+    marginBottom: 20,
   },
   cardImage: {
-    width: 50,
-    height: 50,
-    // borderRadius: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   productName: {
     fontSize: 16,
     fontWeight: "bold",
+    padding: 10,
+    width: "80%",
   },
   productPrice: {
     fontSize: 14,
     color: "#007bff", // Blue color for the price
+    paddingTop: 10,
   },
   itemlistbox: {
-    height: 500,
+    height: 400,
   },
   button: {
     borderStyle: "solid",
