@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
 import axios from "axios";
 import { SearchBar, Card } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
 import RNPickerSelect from "react-native-picker-select";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function CreateListScreen({ navigation }) {
   const [listName, setListName] = useState("");
@@ -19,6 +19,44 @@ function CreateListScreen({ navigation }) {
   const [itemName, setItemName] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedOption, setSelectedOption] = useState("supermarket");
+
+  // Effect to load data from AsyncStorage when the component mounts
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load previously saved listName and items from AsyncStorage
+        const savedListName = await AsyncStorage.getItem("listName");
+        const savedItems = await AsyncStorage.getItem("items");
+
+        if (savedListName) {
+          setListName(savedListName);
+        }
+
+        if (savedItems) {
+          setItems(JSON.parse(savedItems));
+        }
+      } catch (error) {
+        console.error("Error loading data from AsyncStorage:", error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Effect to save draft when listName or items change
+  useEffect(() => {
+    saveData();
+  }, [listName, items]);
+
+  const saveData = async () => {
+    try {
+      // Save listName and items to AsyncStorage
+      await AsyncStorage.setItem("listName", listName);
+      await AsyncStorage.setItem("items", JSON.stringify(items));
+    } catch (error) {
+      console.error("Error saving data to AsyncStorage:", error);
+    }
+  };
 
   const handleFilterChange = (selectedOption) => {
     setSelectedOption(selectedOption);
@@ -103,10 +141,14 @@ function CreateListScreen({ navigation }) {
     }
 
     try {
+      // Get the user ID from AsyncStorage
+      const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+
       // Make a POST request to create a new list using Axios
-      const response = await axios.post("http://losthost:3000/lists", {
+      const response = await axios.post("http://localhost:3000/lists", {
         name: listName,
         items: items,
+        userId: userID,
       });
 
       // Assuming your API returns the created list in the response.data
@@ -115,9 +157,8 @@ function CreateListScreen({ navigation }) {
       // Reset state after creating the list
       setListName("");
       setItems([]);
-
-      // Navigate to the ListsScreen with the new list for display
-      navigation.navigate("Lists");
+      await AsyncStorage.setItem("listName", "");
+      await AsyncStorage.setItem("items", []);
     } catch (error) {
       console.error("Error creating list:", error.message);
       // Handle the error in a way that makes sense for your application
@@ -142,7 +183,12 @@ function CreateListScreen({ navigation }) {
         ]}
         value={selectedOption} // Set an initial value or a default value
       />
-      <TextInput style={styles.listinput} placeholder=" Enter list name" />
+      <TextInput
+        style={styles.listinput}
+        placeholder=" Enter list name"
+        onChangeText={(text) => setListName(text)}
+        value={listName}
+      />
       <SearchBar
         inputContainerStyle={styles.searchinputcontainer}
         containerStyle={styles.searchcontainer}
@@ -154,7 +200,7 @@ function CreateListScreen({ navigation }) {
       {filteredProducts.length > 0 && (
         <View style={styles.searchdropdownContainer}>
           <FlatList
-            data={filteredProducts.slice(0, 10)}
+            data={filteredProducts.slice(0, 50)}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => handleItemPress(item)}>
@@ -180,9 +226,7 @@ function CreateListScreen({ navigation }) {
               <Text style={styles.itemText}>{item.name}</Text>
               <TouchableOpacity onPress={() => onDeleteItem(index)}>
                 <View style={styles.deleteButton}>
-                  <Text style={styles.deleteButtonText}>
-                    <FontAwesome name="trash" size={24} color="red" />
-                  </Text>
+                  <AntDesign style={styles.deleteButtonText} name="delete" />
                 </View>
               </TouchableOpacity>
             </View>
@@ -256,11 +300,13 @@ const styles = StyleSheet.create({
     height: 25,
     width: 25,
     borderRadius: 5,
+    size: 24,
   },
   deleteButtonText: {
-    color: "white",
+    color: "red",
     paddingTop: 2,
     textAlign: "center",
+    size: 24,
   },
   card: {
     margin: 2,
@@ -276,7 +322,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    fontWeight: "bold",
+    // fontWeight: "bold",
     padding: 10,
     width: "80%",
   },
@@ -284,6 +330,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#007bff", // Blue color for the price
     paddingTop: 10,
+    fontWeight: "bold",
   },
   itemlistbox: {
     height: 400,
