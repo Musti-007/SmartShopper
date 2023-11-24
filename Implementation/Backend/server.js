@@ -10,7 +10,7 @@ const port = 3000;
 const db = new sqlite3.Database("data/database.db");
 
 const createTablesQueries = [
-  "CREATE TABLE IF NOT EXISTS users (UserID INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT, Email TEXT, Password TEXT);",
+  "CREATE TABLE IF NOT EXISTS users ( UserID INTEGER PRIMARY KEY AUTOINCREMENT,FirstName TEXT, LastName TEXT,Email TEXT,  Password TEXT);",
   "CREATE TABLE IF NOT EXISTS products (ProductID INTEGER PRIMARY KEY AUTOINCREMENT, ProductName TEXT, Price REAL, Category TEXT, StoreID INTEGER, ListID INTEGER, FOREIGN KEY(StoreID) REFERENCES stores(StoreID), FOREIGN KEY(ListID) REFERENCES lists(ListID));",
   "CREATE TABLE IF NOT EXISTS stores (StoreID INTEGER PRIMARY KEY AUTOINCREMENT, StoreName TEXT, Location TEXT);",
   "CREATE TABLE IF NOT EXISTS lists (ListID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, ListName TEXT, FOREIGN KEY(UserID) REFERENCES users(UserID));",
@@ -189,7 +189,7 @@ app.get("/api/image", async (req, res) => {
 
 // Create a new user
 app.post("/users", (req, res) => {
-  const { username, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   // Hash the password
   bcrypt.hash(password, 10, (err, hashedPassword) => {
@@ -200,14 +200,14 @@ app.post("/users", (req, res) => {
 
     // Insert the new user with the hashed password
     db.run(
-      "INSERT INTO users (username, password) VALUES (?, ?)",
-      [username, hashedPassword],
+      "INSERT INTO users (FirstName, LastName, Email, Password) VALUES (?, ?, ?, ?)",
+      [firstName, lastName, email, hashedPassword],
       function (err) {
         if (err) {
           console.error(err);
           return res.status(500).json({ error: "Failed to create user" });
         }
-        res.status(201).json({ id: this.lastID, username });
+        res.status(201).json({ id: this.lastID, firstName, lastName, email });
       }
     );
   });
@@ -241,12 +241,19 @@ app.get("/users/:id", (req, res) => {
 
 // Login endpoint
 app.post("/login", (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
+
+  // app.post("/login", (req, res) => {
+  //   const { email, password } = req.body;
+  //   console.log("Received login request:", { email, password });
+
+  //   // ... rest of the code
+  // });
 
   // Check if the user exists
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
+  db.get("SELECT * FROM users WHERE Email = ?", [email], (err, user) => {
     if (err) {
-      console.error(err);
+      console.error("Database error:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -257,7 +264,7 @@ app.post("/login", (req, res) => {
     // Check if the password is correct
     bcrypt.compare(password, user.Password, (bcryptErr, passwordMatch) => {
       if (bcryptErr) {
-        console.error(bcryptErr);
+        console.error("Bcrypt error:", bcryptErr);
         return res.status(500).json({ error: "Internal server error" });
       }
 
@@ -266,8 +273,8 @@ app.post("/login", (req, res) => {
       }
 
       res.json({
-        userId: JSON.stringify(user.UserID),
-        username: user.Username,
+        userId: user.UserID,
+        email: user.Email,
       });
     });
   });
