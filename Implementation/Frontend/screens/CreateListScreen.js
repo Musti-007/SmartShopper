@@ -174,15 +174,22 @@ function CreateListScreen({ navigation }) {
         <AntDesign name="arrowleft" size={24} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Create Grocery List</Text>
-      <RNPickerSelect
-        onValueChange={(value) => handleFilterChange(value)}
-        items={[
-          { label: "Sort by Supermarket", value: "supermarket" },
-          { label: "Sort by Price", value: "price" },
-          { label: "Sort by Name", value: "name" },
-        ]}
-        value={selectedOption} // Set an initial value or a default value
-      />
+      <View style={styles.filterContainer}>
+        <RNPickerSelect
+          style={{
+            inputIOS: styles.selectContainer,
+            inputAndroid: styles.selectContainer,
+            placeholder: {}, // Add styles for the placeholder if needed
+          }}
+          onValueChange={(value) => handleFilterChange(value)}
+          items={[
+            { label: "Sort by Supermarket", value: "supermarket" },
+            { label: "Sort by Price", value: "price" },
+            { label: "Sort by Name", value: "name" },
+          ]}
+          value={selectedOption} // Set an initial value or a default value
+        />
+      </View>
       <TextInput
         style={styles.listinput}
         placeholder=" Enter list name"
@@ -263,6 +270,22 @@ const styles = StyleSheet.create({
   },
   searchinput: {
     color: "black",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 10,
+    paddingRight: 8,
+  },
+  selectContainer: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingLeft: 10,
+    paddingRight: 30, // Add padding for the dropdown icon
+    backgroundColor: "white",
+    color: "black", // Text color
   },
   listinput: {
     borderStyle: "solid",
