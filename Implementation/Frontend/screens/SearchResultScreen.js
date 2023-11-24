@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card, Button } from "react-native-elements";
-import Select from "react-select";
+import RNPickerSelect from "react-native-picker-select";
 
 const SearchResultScreen = ({ route, navigation }) => {
   const { searchedText, products } = route.params;
   const [searchText, setSearchText] = useState(searchedText);
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedFilter, setSelectedFilter] = useState("supermarket");
+  const [selectedOption, setSelectedOption] = useState("supermarket");
 
   const handleSearch = async (text) => {
     setSearchText(text);
@@ -43,16 +43,24 @@ const SearchResultScreen = ({ route, navigation }) => {
   };
 
   const handleFilterChange = (selectedOption) => {
-    setSelectedFilter(selectedOption.value);
-    // Logic to sort the data based on the selected filter
+    setSelectedOption(selectedOption);
+
+    if (filteredProducts.length === 0) {
+      return;
+    }
+
     let sortedProducts = [...filteredProducts];
-    if (selectedOption.value === "supermarket") {
-      sortedProducts.sort((a, b) => a.c.localeCompare(b.c));
-    } else if (selectedOption.value === "price") {
+    if (selectedOption === "supermarket") {
+      console.log("Sorting by supermarket");
+      sortedProducts.sort((a, b) => a.supermarket.localeCompare(b.supermarket));
+    } else if (selectedOption === "price") {
+      console.log("Sorting by price");
       sortedProducts.sort((a, b) => a.p - b.p);
-    } else if (selectedOption.value === "name") {
+    } else if (selectedOption === "name") {
+      console.log("Sorting by name");
       sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
     }
+    // console.log("Sorted products:", sortedProducts);
     setFilteredProducts(sortedProducts);
   };
 
@@ -78,14 +86,19 @@ const SearchResultScreen = ({ route, navigation }) => {
         Search Results for <Text style={styles.boldText}>"{searchText}"</Text>
       </Text>
       <View style={styles.filterContainer}>
-        <Select
-          options={[
-            { value: "supermarket", label: "Sort by Supermarket" },
-            { value: "price", label: "Sort by Price" },
-            { value: "name", label: "Sort by Name" },
+        <RNPickerSelect
+          style={{
+            inputIOS: styles.selectContainer,
+            inputAndroid: styles.selectContainer,
+            placeholder: {}, // Add styles for the placeholder if needed
+          }}
+          onValueChange={(value) => handleFilterChange(value)}
+          items={[
+            { label: "Sort by Supermarket", value: "supermarket" },
+            { label: "Sort by Price", value: "price" },
+            { label: "Sort by Name", value: "name" },
           ]}
-          value={{ value: selectedFilter, label: `Sort by ${selectedFilter}` }}
-          onChange={handleFilterChange}
+          value={selectedOption} // Set an initial value or a default value
         />
       </View>
       <View style={styles.searchresultContainer}>
@@ -163,6 +176,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 10,
+    height: 40,
+  },
+  filterdropdown: {
+    justifyContent: "center",
+    marginBottom: 10,
+    height: 40,
   },
   cardContainer: {
     marginBottom: 2,
