@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
@@ -6,18 +5,17 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  CheckBox,
   Alert,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
-import bcrypt from "react-native-bcrypt";
+import Checkbox from "expo-checkbox";
 
 export default function App({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [isChecked, setChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -52,6 +50,9 @@ export default function App({ navigation }) {
         // Set the 'isLoggedIn' flag in AsyncStorage to true
         AsyncStorage.setItem("email", response.data.email);
 
+        // Set the 'isLoggedIn' flag in AsyncStorage to true
+        AsyncStorage.setItem("firstName", response.data.firstName);
+
         // You can perform navigation or set user state accordingly
         navigation.navigate("Home");
       })
@@ -67,53 +68,50 @@ export default function App({ navigation }) {
   };
 
   return (
-    <View style={styles.body}>
+    <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Enter your email and password.</Text>
-      <View style={styles.container}>
-        <View style={styles.inputView}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter your email"
-            placeholderTextColor="#003f5c"
-            onChangeText={(email) => setEmail(email)}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={(email) => setEmail(email)}
+        />
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter your password"
+          value={password}
+          secureTextEntry={!showPassword}
+          onChangeText={(password) => setPassword(password)}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={{ position: "absolute", right: 10, top: 10 }}
+        >
+          <Icon
+            style={styles.passwordshowicon}
+            name={showPassword ? "eye" : "eye-slash"}
+            size={20}
+            color="black"
           />
-        </View>
-        <View style={styles.inputView}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter your password"
-            placeholderTextColor="#003f5c"
-            secureTextEntry={!showPassword}
-            onChangeText={(password) => setPassword(password)}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={{ position: "absolute", right: 10, top: 10 }}
-          >
-            <Icon
-              style={styles.passwordshowicon}
-              name={showPassword ? "eye" : "eye-slash"}
-              size={20}
-              color="black"
-            />
-          </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
         <View style={styles.checkboxContainer}>
-          <CheckBox
-            value={keepLoggedIn}
-            onValueChange={setKeepLoggedIn}
+          <Checkbox
             style={styles.checkbox}
+            value={isChecked}
+            onValueChange={setChecked}
+            color={isChecked ? "#4630EB" : undefined}
           />
           <Text style={styles.checkboxLabel}>Keep me logged in</Text>
         </View>
         <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
           <Text style={{ color: "white" }}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.forgotButton}>
-          <Text>Forgot Password?</Text>
+        <TouchableOpacity>
+          <Text style={styles.forgotButton}>Forgot Password?</Text>
         </TouchableOpacity>
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don't have an account?</Text>
@@ -121,7 +119,7 @@ export default function App({ navigation }) {
             style={styles.signupButton}
             onPress={() => navigation.navigate("Register")}
           >
-            <Text style={{ color: "blue" }}>Sign up</Text>
+            <Text style={styles.signupButton}>Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -130,17 +128,13 @@ export default function App({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  body: {
-    backgroundColor: "#f0f0f0",
-    height: "100%",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#f0f0f0",
-    // alignItems: "center",
-    marginTop: 20,
-    marginBottom: 20,
-    paddingLeft: 15,
+  inputContainer: {
+    // flex: 1,
+    // backgroundColor: "#f0f0f0",
+    // // alignItems: "center",
+    // marginTop: 20,
+    // marginBottom: 20,
+    // paddingLeft: 15,
   },
   title: {
     fontSize: 40,
@@ -152,28 +146,28 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
-    paddingLeft: 15,
-  },
-  inputView: {
-    width: "95%",
-    marginBottom: 40,
-    // borderWidth: 1,
+    paddingLeft: 20,
   },
   label: {
     marginBottom: 5,
+    paddingLeft: 20,
+    fontSize: 16,
   },
   textInput: {
-    height: 50,
-    flex: 1,
-    padding: 10,
+    height: 40,
+    borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
-    borderColor: "black",
+    marginBottom: 32,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    width: "94%",
+    alignSelf: "center",
   },
   passwordshowicon: {
-    height: 50,
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 120,
+    paddingRight: 15,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -181,13 +175,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   checkbox: {
-    marginRight: 8,
+    marginLeft: 15,
   },
   checkboxLabel: {
     fontSize: 16,
+    marginLeft: 5,
   },
   loginBtn: {
-    width: "80%",
+    width: "50%",
     borderRadius: 12,
     height: 50,
     alignItems: "center",
@@ -196,11 +191,13 @@ const styles = StyleSheet.create({
     marginTop: 30,
     backgroundColor: "#6666FF",
     marginBottom: 30,
+    // fontSize: 16,
   },
   forgotButton: {
     height: 30,
     marginBottom: 20,
     alignSelf: "center",
+    fontSize: 16,
   },
   signupContainer: {
     flexDirection: "row",
@@ -209,6 +206,11 @@ const styles = StyleSheet.create({
   },
   signupText: {
     marginRight: 5,
+    fontSize: 16,
   },
-  signupButton: {},
+  signupButton: {
+    color: "#C87E61",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
