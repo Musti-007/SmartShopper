@@ -70,7 +70,7 @@ app.post("/lists", (req, res) => {
               // Insert into the 'products' table with a reference to the store
               db.run(
                 "INSERT INTO products (ProductName, Price, Category, StoreID, ListID) VALUES (?, ?, ?, ?, ?)",
-                [item.name, item.price, "Some category", storeId, listId],
+                [item.name, item.price, item.category, storeId, listId],
                 function (err) {
                   if (err) {
                     console.error(err);
@@ -91,7 +91,7 @@ app.post("/lists", (req, res) => {
 
                       res.status(201).json({
                         listId,
-                        userId: 0,
+                        userId: "0",
                         productId: this.lastID,
                         quantity: items.length,
                       });
@@ -275,9 +275,40 @@ app.post("/login", (req, res) => {
       res.json({
         userId: user.UserID,
         email: user.Email,
+        firstName: user.FirstName,
       });
     });
   });
+});
+
+// Update user information
+app.put("/users/:id", (req, res) => {
+  const { id } = req.params;
+  const { firstName, lastName, email } = req.body;
+
+  // Update the user information in the database
+  db.run(
+    "UPDATE users SET FirstName = ?, LastName = ?, Email = ? WHERE UserID = ?",
+    [firstName, lastName, email, id],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to update user" });
+      }
+
+      // Fetch and return the updated user information
+      db.get("SELECT * FROM users WHERE UserID = ?", [userId], (err, user) => {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Failed to retrieve updated user" });
+        }
+
+        res.json({ success: true });
+      });
+    }
+  );
 });
 
 app.listen(port, () => {
