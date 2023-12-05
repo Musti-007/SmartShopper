@@ -212,11 +212,11 @@ function CreateListScreen({ navigation }) {
           <RNPickerSelect
             style={{
               inputIOS: {
-                color: "pink",
+                color: "white",
                 paddingHorizontal: 10,
                 height: 30,
                 backgroundColor: "#6666F6",
-                borderRadius: 5,
+                borderRadius: 10,
               },
               placeholder: {
                 color: "white",
