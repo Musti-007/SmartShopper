@@ -6,19 +6,22 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import { SearchBar, Card } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
 import RNPickerSelect from "react-native-picker-select";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 function CreateListScreen({ navigation }) {
   const [listName, setListName] = useState("");
   const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedOption, setSelectedOption] = useState("supermarket");
+  const [selectedOption, setSelectedOption] = useState("price");
+  const [supermarkets, setSupermarkets] = useState([]);
 
   // Effect to load data from AsyncStorage when the component mounts
   useEffect(() => {
@@ -27,6 +30,7 @@ function CreateListScreen({ navigation }) {
         // Load previously saved listName and items from AsyncStorage
         const savedListName = await AsyncStorage.getItem("listName");
         const savedItems = await AsyncStorage.getItem("items");
+        const savedLocations = await AsyncStorage.getItem("supermarkets");
 
         if (savedListName) {
           setListName(savedListName);
@@ -34,6 +38,10 @@ function CreateListScreen({ navigation }) {
 
         if (savedItems) {
           setItems(JSON.parse(savedItems));
+        }
+
+        if (savedLocations) {
+          setSupermarkets(JSON.parse(savedLocations));
         }
       } catch (error) {
         console.error("Error loading data from AsyncStorage:", error);
@@ -92,9 +100,10 @@ function CreateListScreen({ navigation }) {
         if (product.n.toLowerCase().includes(searchTextLower)) {
           filteredItems.push({
             n: product.n,
+            s: product.s,
             p: product.p,
             i: section.i,
-            supermarket: section.n,
+            supermarket: section.c,
           });
         }
       }
@@ -119,10 +128,30 @@ function CreateListScreen({ navigation }) {
   };
 
   const handleItemPress = (item) => {
-    setItems([
-      ...items,
-      { name: item.n, price: item.p, store: item.supermarket },
-    ]);
+    const foundSupermarket = supermarkets.find((supermarket) => {
+      if (
+        item.supermarket.toLowerCase() === "ah" &&
+        supermarket.name.toLowerCase() === "albert heijn"
+      ) {
+        return supermarket.name;
+      } else if (
+        item.supermarket.toLowerCase() === supermarket.name.toLowerCase()
+      ) {
+        return supermarket.name;
+      }
+    });
+
+    if (foundSupermarket) {
+      setItems([
+        ...items,
+        {
+          name: item.n,
+          price: item.p,
+          store: item.supermarket,
+          location: `${foundSupermarket.lat}, ${foundSupermarket.lon}`,
+        },
+      ]);
+    }
 
     setItemName("");
     setFilteredProducts([]);
@@ -157,97 +186,124 @@ function CreateListScreen({ navigation }) {
       // Reset state after creating the list
       setListName("");
       setItems([]);
-      await AsyncStorage.setItem("listName", "");
-      await AsyncStorage.setItem("items", []);
+      await AsyncStorage.removeItem("listName");
+      await AsyncStorage.removeItem("items");
     } catch (error) {
       console.error("Error creating list:", error.message);
       // Handle the error in a way that makes sense for your application
     }
+    Alert.alert(`You have successfully created ${listName}.`);
   };
 
   return (
-    <View>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <AntDesign name="arrowleft" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Create Grocery List</Text>
-      <View style={styles.filterContainer}>
-        <RNPickerSelect
-          style={{
-            inputIOS: styles.selectContainer,
-            inputAndroid: styles.selectContainer,
-            placeholder: {}, // Add styles for the placeholder if needed
-          }}
-          onValueChange={(value) => handleFilterChange(value)}
-          items={[
-            { label: "Sort by Supermarket", value: "supermarket" },
-            { label: "Sort by Price", value: "price" },
-            { label: "Sort by Name", value: "name" },
-          ]}
-          value={selectedOption} // Set an initial value or a default value
+    <LinearGradient
+      colors={["#371E57", "#0E1223"]}
+      style={styles.linearGradient}
+    >
+      <View>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <AntDesign name="left" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Create Grocery List</Text>
+        <View style={styles.filterContainer}>
+          <RNPickerSelect
+            style={{
+              inputIOS: {
+                color: "pink",
+                paddingHorizontal: 10,
+                height: 30,
+                backgroundColor: "#6666F6",
+                borderRadius: 5,
+              },
+              placeholder: {
+                color: "white",
+              },
+              inputAndroid: {
+                color: "white",
+                paddingHorizontal: 10,
+                backgroundColor: "red",
+                borderRadius: 5,
+              },
+            }}
+            onValueChange={(value) => handleFilterChange(value)}
+            items={[
+              { label: "Sort by Supermarket", value: "supermarket" },
+              { label: "Sort by Price", value: "price" },
+              { label: "Sort by Name", value: "name" },
+            ]}
+            value={selectedOption} // Set an initial value or a default value
+          />
+        </View>
+        <TextInput
+          style={styles.listinput}
+          placeholder=" Enter list name"
+          placeholderTextColor="gray"
+          onChangeText={(text) => setListName(text)}
+          value={listName}
         />
-      </View>
-      <TextInput
-        style={styles.listinput}
-        placeholder=" Enter list name"
-        onChangeText={(text) => setListName(text)}
-        value={listName}
-      />
-      <SearchBar
-        inputContainerStyle={styles.searchinputcontainer}
-        containerStyle={styles.searchcontainer}
-        inputStyle={styles.searchinput}
-        placeholder="Add item"
-        onChangeText={(text) => handleSearch(text)}
-        value={itemName}
-      />
-      {filteredProducts.length > 0 && (
-        <View style={styles.searchdropdownContainer}>
+        <SearchBar
+          inputContainerStyle={styles.searchinputcontainer}
+          containerStyle={styles.searchcontainer}
+          inputStyle={styles.searchinput}
+          placeholder="Add item"
+          placeholderTextColor="gray"
+          onChangeText={(text) => handleSearch(text)}
+          value={itemName}
+        />
+        {filteredProducts.length > 0 && (
+          <View style={styles.searchdropdownContainer}>
+            <FlatList
+              data={filteredProducts.slice(0, 50)}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => handleItemPress(item)}>
+                  <View style={styles.card}>
+                    <Card.Image
+                      source={{ uri: item.i }}
+                      style={styles.cardImage}
+                    />
+                    <View style={styles.productInfo}>
+                      <Text style={styles.productName}>{item.n}</Text>
+                      <Text style={styles.description}>{item.s}</Text>
+                    </View>
+                    <Text style={styles.productPrice}>€{item.p}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
+        <View style={styles.itemlistbox}>
           <FlatList
-            data={filteredProducts.slice(0, 50)}
+            data={items}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleItemPress(item)}>
-                <View style={styles.card}>
-                  <Card.Image
-                    source={{ uri: item.i }}
-                    style={styles.cardImage}
-                  />
-                  <Text style={styles.productName}>{item.n}</Text>
-                  <Text style={styles.productPrice}>€{item.p}</Text>
-                </View>
-              </TouchableOpacity>
+            renderItem={({ item, index }) => (
+              <View style={styles.listItem}>
+                <Text style={styles.itemText}>{item.name}</Text>
+                <TouchableOpacity onPress={() => onDeleteItem(index)}>
+                  <View style={styles.deleteButton}>
+                    <AntDesign style={styles.deleteButtonText} name="delete" />
+                  </View>
+                </TouchableOpacity>
+              </View>
             )}
           />
         </View>
-      )}
-      <View style={styles.itemlistbox}>
-        <FlatList
-          data={items}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.listItem}>
-              <Text style={styles.itemText}>{item.name}</Text>
-              <TouchableOpacity onPress={() => onDeleteItem(index)}>
-                <View style={styles.deleteButton}>
-                  <AntDesign style={styles.deleteButtonText} name="delete" />
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
+        <TouchableOpacity style={styles.button} onPress={handleCreateList}>
+          <Text style={styles.buttonText}>Create List</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleCreateList}>
-        <Text style={styles.buttonText}>Create List</Text>
-      </TouchableOpacity>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  linearGradient: {
+    flex: 1,
+  },
   backButton: {
     position: "absolute",
     top: 10,
@@ -256,17 +312,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 40,
-    marginTop: 40,
-    marginBottom: 40,
+    marginTop: 20,
+    marginBottom: 20,
     alignSelf: "flex-start",
     padding: 20,
+    color: "white",
   },
   searchcontainer: {
-    backgroundColor: "#E2E8EE",
+    backgroundColor: "#3B3B7F",
     border: 0,
   },
   searchinputcontainer: {
     backgroundColor: "#BEC5CE",
+    borderRadius: 30,
   },
   searchinput: {
     color: "black",
@@ -274,8 +332,8 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginBottom: 10,
-    paddingRight: 8,
+    marginBottom: 5,
+    paddingRight: 2,
   },
   selectContainer: {
     height: 40,
@@ -288,25 +346,23 @@ const styles = StyleSheet.create({
     color: "black", // Text color
   },
   listinput: {
-    borderStyle: "solid",
-    borderRadius: 3,
-    width: "96%",
+    width: "100%",
     height: 50,
-    backgroundColor: "#BEC5CE",
-    marginLeft: 8,
+    backgroundColor: "#3B3B7F",
     fontSize: 18,
+    paddingLeft: 10,
+    color: "white",
   },
   searchdropdownContainer: {
-    backgroundColor: "#E2E8EE",
+    backgroundColor: "#3B3B7F",
     padding: 10,
     position: "absolute",
-    top: 282,
+    top: 275,
     zIndex: 1,
     width: "100%",
     borderColor: "gray",
     display: "flex",
   },
-
   listItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -317,43 +373,49 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
+    color: "white",
   },
   deleteButton: {
-    // backgroundColor: "gray",
-    height: 25,
-    width: 25,
-    borderRadius: 5,
-    size: 24,
+    textAlign: "center",
+    justifyContent: "center",
   },
   deleteButtonText: {
     color: "red",
-    paddingTop: 2,
-    textAlign: "center",
-    size: 24,
+  },
+  productInfo: {
+    flex: 1,
+    marginLeft: 10,
+    justifyContent: "center",
   },
   card: {
-    margin: 2,
     flexDirection: "row",
-    borderRadius: 5,
-    borderbottom: 1,
+    flexWrap: "wrap",
     marginBottom: 20,
+    backgroundColor: "#3B3B7F",
   },
   cardImage: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 20,
+    // alignSelf: "flex-start",
   },
   productName: {
     fontSize: 16,
-    // fontWeight: "bold",
-    padding: 10,
-    width: "80%",
+    paddingLeft: 10,
+    width: "95%",
+    color: "white",
   },
   productPrice: {
     fontSize: 14,
-    color: "#007bff", // Blue color for the price
+    color: "#C87E61", // Blue color for the price
     paddingTop: 10,
     fontWeight: "bold",
+    width: "12%",
+  },
+  description: {
+    fontSize: 12,
+    paddingLeft: 10,
+    color: "grey",
   },
   itemlistbox: {
     height: 400,
@@ -361,10 +423,10 @@ const styles = StyleSheet.create({
   button: {
     borderStyle: "solid",
     borderWidth: 1,
-    borderRadius: 3,
+    borderRadius: 10,
     width: "42%",
     height: 50,
-    backgroundColor: "#2F6DC3",
+    backgroundColor: "#6666F6",
     margin: 10,
     justifyContent: "center",
     alignSelf: "center",
