@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState("");
@@ -59,68 +60,77 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Registration</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="First Name"
-          value={firstName}
-          onChangeText={(text) => setFirstName(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          value={lastName}
-          onChangeText={(text) => setLastName(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="New Password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          secureTextEntry={true}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Repeat New Password"
-          value={repeatPassword}
-          onChangeText={(text) => setRepeatPassword(text)}
-          secureTextEntry={true}
-        />
-      </View>
-      <TouchableOpacity style={styles.regButton} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
-
-      <View style={styles.loginContainer}>
-        <Text style={styles.logbuttonText}>Already have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.blueText}>Login</Text>
+    <LinearGradient
+      colors={["#371E57", "#0E1223"]}
+      style={styles.linearGradient}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Registration</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="First Name"
+            placeholderTextColor="gray"
+            value={firstName}
+            onChangeText={(text) => setFirstName(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Last Name"
+            placeholderTextColor="gray"
+            value={lastName}
+            onChangeText={(text) => setLastName(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="gray"
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="New Password"
+            placeholderTextColor="gray"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            secureTextEntry={true}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Repeat New Password"
+            placeholderTextColor="gray"
+            value={repeatPassword}
+            onChangeText={(text) => setRepeatPassword(text)}
+            secureTextEntry={true}
+          />
+        </View>
+        <TouchableOpacity style={styles.regButton} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
+
+        <View style={styles.loginContainer}>
+          <Text style={styles.logbuttonText}>Already have an account?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.blueText}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   padding: 16,
-  //   justifyContent: "center",
-  // },
+  linearGradient: {
+    flex: 1,
+  },
   title: {
     fontSize: 40,
     marginTop: 40,
     marginBottom: 40,
     alignSelf: "flex-start",
     padding: 20,
+    color: "white",
   },
   inputContainer: {
     // marginBottom: 150,
@@ -135,6 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: "94%",
     alignSelf: "center",
+    color: "white",
   },
   regButton: {
     borderRadius: 10,
@@ -155,15 +166,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 100,
+    // fontSize: 16,
   },
   logbuttonText: {
     textAlign: "center",
-    color: "6666FF",
+    color: "white",
     fontSize: 16,
   },
   blueText: {
     color: "#C87E61",
     marginLeft: 5, // Add margin between "Already have an account?" and "Login"
     fontWeight: "bold",
+    fontSize: 16,
   },
 });
