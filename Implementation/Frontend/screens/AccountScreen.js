@@ -1,59 +1,194 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AntDesign } from "@expo/vector-icons";
+import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 
 const AccountScreen = ({ navigation }) => {
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const fetchUsername = async () => {
+    const fetchUserData = async () => {
       try {
-        const storedUsername = await AsyncStorage.getItem("username");
-        setUsername(storedUsername);
+        const storedFirstName = await AsyncStorage.getItem("firstName");
+        const storedLastName = await AsyncStorage.getItem("lastName");
+        const storedEmail = await AsyncStorage.getItem("email");
+
+        setFirstName(storedFirstName);
+        setLastName(storedLastName);
+        setEmail(storedEmail);
       } catch (error) {
-        console.error("Error reading username from AsyncStorage:", error);
+        console.error("Error reading user data from AsyncStorage:", error);
       }
     };
 
-    fetchUsername();
+    fetchUserData();
   }, []);
 
   const handleLogout = async () => {
     try {
-      // Clear AsyncStorage or remove specific user-related data
       await AsyncStorage.clear();
-
-      // // Navigate to the login screen
-      // navigation.navigate('Login');
-
-      // Reset the navigation stack and navigate to the login screen
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
+  const handleEditPress = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      // Fetch user data from AsyncStorage or your user authentication system
+      const storedUserId = await AsyncStorage.getItem("userId");
+
+      // Save the updated user information to the server
+      await axios.put(`http://localhost:3000/users/${storedUserId}`, {
+        firstName,
+        lastName,
+        email,
+      });
+
+      // Optionally, you can also update the user information in your state or context
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving changes:", error);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.usernameText}>Welcome, {username}!</Text>
-      <Button title="Logout" onPress={handleLogout} />
-      {/* Add more components or functionality as needed */}
-    </View>
+    <LinearGradient
+      colors={["#371E57", "#0E1223"]}
+      style={styles.linearGradient}
+    >
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+      >
+        <AntDesign name="left" size={24} color="white" />
+      </TouchableOpacity>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.greetingText}>Welcome, {firstName}!</Text>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <TouchableOpacity style={styles.editIcon} onPress={handleEditPress}>
+            <AntDesign name="edit" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.label}>First Name:</Text>
+          <TextInput
+            style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
+            editable={isEditing}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Last Name:</Text>
+          <TextInput
+            style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
+            editable={isEditing}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email:</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            editable={false} // Email is not editable in this example
+          />
+        </View>
+        <View style={styles.groupbutton}>
+          {isEditing && (
+            <TouchableOpacity style={styles.button} onPress={handleSaveChanges}>
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={handleLogout}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  linearGradient: {
     flex: 1,
-    alignItems: "center",
   },
-  usernameText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
+  greetingText: {
+    fontSize: 40,
+    marginTop: 40,
+    marginBottom: 40,
+    alignSelf: "flex-start",
+    padding: 20,
+    color: "white",
+  },
+  editIcon: {
+    alignSelf: "flex-end",
+    paddingRight: 20,
+  },
+  label: {
+    marginBottom: 5,
+    paddingLeft: 15,
+    fontSize: 16,
+    color: "white",
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 40,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    width: "94%",
+    alignSelf: "center",
+    color: "white",
+  },
+  groupbutton: {
+    marginTop: 90,
+  },
+  button: {
+    width: "50%",
+    borderRadius: 12,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 20,
+    backgroundColor: "#6666FF",
+    // marginBottom: 30,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
 
