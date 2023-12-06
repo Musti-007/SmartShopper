@@ -26,7 +26,7 @@ function HomeScreen({ navigation }) {
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    const data = await axios.get("http://localhost:3000/api/data");
+    const data = await axios.get("http://192.168.1.218:3000/api/data");
     // console.log("Data result: ", data.data);
 
     for (const section of data.data) {

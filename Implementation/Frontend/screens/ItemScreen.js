@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Card, Button } from "react-native-elements";
+import { Card } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,7 +24,9 @@ const ItemScreen = ({ route }) => {
       const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
 
       // Fetch lists from the server using axios
-      const response = await axios.get(`http://localhost:3000/lists/${userID}`);
+      const response = await axios.get(
+        `http://192.168.1.218:3000/lists/${userID}`
+      );
       console.log(response.data);
       setLists(response.data);
     } catch (error) {

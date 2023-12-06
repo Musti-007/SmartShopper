@@ -32,7 +32,7 @@ export default function RegisterScreen({ navigation }) {
     }
 
     axios
-      .post("http://localhost:3000/users", {
+      .post("http://192.168.1.218:3000/users", {
         firstName,
         lastName,
         email,

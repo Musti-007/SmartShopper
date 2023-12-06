@@ -23,7 +23,7 @@ function ListDetailsScreen({ route }) {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/combinedData/${list.ListID}`
+          `http://192.168.1.218:3000/combinedData/${list.ListID}`
         );
         setCombinedData(response.data);
       } catch (error) {

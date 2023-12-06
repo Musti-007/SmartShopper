@@ -26,7 +26,9 @@ function ListsScreen({ navigation }) {
       const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
 
       // Fetch lists from the server using axios and the user ID
-      const response = await axios.get(`http://localhost:3000/lists/${userID}`);
+      const response = await axios.get(
+        `http://192.168.1.218:3000/lists/${userID}`
+      );
 
       // Update the state with the fetched lists using the callback version
       setLists((prevLists) => [...prevLists, ...response.data]);
@@ -42,7 +44,7 @@ function ListsScreen({ navigation }) {
       const listIdToDelete = lists[listIndex].ListID;
 
       // Make a DELETE request to your server to delete the list
-      await axios.delete(`http://localhost:3000/lists/${listIdToDelete}`);
+      await axios.delete(`http://192.168.1.218:3000/lists/${listIdToDelete}`);
 
       // Update the state to reflect the deletion
       const updatedLists = [...lists];
