@@ -55,7 +55,7 @@ app.post("/lists", (req, res) => {
         items.forEach((item, index) => {
           db.run(
             "INSERT INTO stores (StoreName, Location) VALUES (?, ?)",
-            [item.store, "Some Location"],
+            [item.store, item.location],
             function (err) {
               if (err) {
                 console.error(err);
@@ -70,7 +70,7 @@ app.post("/lists", (req, res) => {
               // Insert into the 'products' table with a reference to the store
               db.run(
                 "INSERT INTO products (ProductName, Price, Category, StoreID, ListID) VALUES (?, ?, ?, ?, ?)",
-                [item.name, item.price, item.category, storeId, listId],
+                [item.name, item.price, item.description, storeId, listId],
                 function (err) {
                   if (err) {
                     console.error(err);
@@ -158,6 +158,61 @@ app.delete("/lists/:id", (req, res) => {
     }
     res.json({ id: Number(id) });
   });
+});
+
+// Define the endpoint to create a new product for a specific ListID
+app.post("/products/:id", async (req, res) => {
+  const listID = req.params.id;
+  const { productName, price, category, storeName } = req.body;
+
+  // Validate the incoming data
+  if (!productName || !price || !category || !storeName) {
+    res.status(400).json({ error: "Product information is incomplete" });
+    return;
+  }
+
+  try {
+    let storesID;
+
+    // Insert the new store into the stores table
+    const storeQuery = "INSERT INTO stores (StoreName, Location) VALUES (?, ?)";
+    const storeValues = [storeName, "Some Location"];
+
+    await db.run(storeQuery, storeValues, function (err) {
+      if (err) {
+        throw err;
+      }
+      storesID = this.lastID;
+      console.log("storesID:", storesID);
+
+      // Insert the new product into the products table
+      const productQuery =
+        "INSERT INTO products (ProductName, Price, Category, ListID, StoreID) VALUES (?, ?, ?, ?, ?)";
+      const productValues = [productName, price, category, listID, storesID];
+
+      db.run(productQuery, productValues, function (err) {
+        if (err) {
+          throw err;
+        }
+
+        // Return the details of the newly created product
+        const productID = this.lastID;
+        console.log("productID:", productID);
+
+        res.json({
+          productID,
+          productName,
+          price,
+          category,
+          listID,
+          storesID,
+        });
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Define the endpoint to get products based on ListID
@@ -273,9 +328,10 @@ app.post("/login", (req, res) => {
       }
 
       res.json({
-        userId: user.UserID,
+        userId: JSON.stringify(user.UserID),
         email: user.Email,
         firstName: user.FirstName,
+        lastName: user.LastName,
       });
     });
   });
@@ -297,7 +353,7 @@ app.put("/users/:id", (req, res) => {
       }
 
       // Fetch and return the updated user information
-      db.get("SELECT * FROM users WHERE UserID = ?", [userId], (err, user) => {
+      db.get("SELECT * FROM users WHERE UserID = ?", [id], (err, user) => {
         if (err) {
           console.error(err);
           return res
@@ -307,6 +363,29 @@ app.put("/users/:id", (req, res) => {
 
         res.json({ success: true });
       });
+    }
+  );
+});
+
+app.get("/combinedData/:id", (req, res) => {
+  const listID = req.params.id;
+
+  // Query the database to get combined data for the specified ListID
+  db.all(
+    `
+    SELECT p.ProductID, p.ProductName, p.Price, p.Category, s.StoreID, s.StoreName, s.Location
+    FROM products p
+    JOIN stores s ON p.StoreID = s.StoreID
+    WHERE p.ListID = ?
+    `,
+    [listID],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+
+      res.json(rows);
     }
   );
 });
