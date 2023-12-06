@@ -5,16 +5,21 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import axios from "axios";
 import { FontAwesome } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { SearchBar, Card } from "react-native-elements";
+import { SearchBar } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 
 function HomeScreen({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [listOfSuperMarkets, setListOfSupermarkets] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login status
 
   const handleSearch = async (text) => {
     setSearchText(text);
@@ -32,6 +37,7 @@ function HomeScreen({ navigation }) {
             p: product.p,
             c: section.c,
             i: section.i,
+            s: product.s,
           });
         }
       }
@@ -45,8 +51,6 @@ function HomeScreen({ navigation }) {
     setFilteredProducts(filteredItems);
   };
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login status
-
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -59,6 +63,47 @@ function HomeScreen({ navigation }) {
     };
 
     checkLoginStatus();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({}); // Set user location with lat long
+
+      await AsyncStorage.setItem(
+        "location",
+        `${location.coords.latitude}, ${location.coords.longitude}`
+      ); // Check if data is already stored in AsyncStorage
+
+      const storedData = await AsyncStorage.getItem("supermarkets");
+
+      if (storedData) {
+        // Data is already stored, no need to make the request again
+        console.log("Data already exists:", storedData);
+        setListOfSupermarkets(storedData);
+        return;
+      } // Fetch supermarket data using OpenStreetMap Nominatim API with axios
+
+      const apiUrl = `https://nominatim.openstreetmap.org/search?q=supermarket+near+${location.coords.latitude}%2C+${location.coords.longitude}&limit=40&format=json`;
+
+      try {
+        const response = await axios.get(apiUrl);
+        const storeData = response.data; // Convert the object to a JSON string before storing
+
+        const jsonData = JSON.stringify(storeData);
+        console.log("Setting new data");
+        await AsyncStorage.setItem("supermarkets", jsonData);
+        setListOfSupermarkets(jsonData);
+      } catch (error) {
+        console.error("Error fetching supermarket data", error);
+      }
+    })();
   }, []);
 
   const handleListButtonPress = () => {
@@ -88,101 +133,106 @@ function HomeScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <View style={styles.groupButton}>
-        <TouchableOpacity style={styles.button} onPress={handleListButtonPress}>
-          <Text style={styles.buttonText}>List</Text>
-        </TouchableOpacity>
+    <LinearGradient
+      colors={["#371E57", "#0E1223"]}
+      style={styles.linearGradient}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Home</Text>
+        <View style={styles.groupButton}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleListButtonPress}
+          >
+            <Text style={styles.buttonText}>List</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleCreateListButtonPress}
-        >
-          <Text style={styles.buttonText}>Create List</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCreateListButtonPress}
+          >
+            <Text style={styles.buttonText}>Create List</Text>
+          </TouchableOpacity>
+        </View>
 
-      <SearchBar
-        inputContainerStyle={styles.searchinputcontainer}
-        containerStyle={styles.searchcontainer}
-        inputStyle={styles.searchinput}
-        placeholder="Search for an item ..."
-        onChangeText={(text) => handleSearch(text)}
-        onSubmitEditing={() => {
-          if (searchText.trim() !== "") {
-            // Navigate to SearchScreen only if the search text is not empty
-            navigation.navigate("SearchResult", {
-              searchedText: searchText,
-              products: filteredProducts,
-            });
-          }
-        }}
-        value={searchText}
-      />
+        <SearchBar
+          containerStyle={styles.searchcontainer}
+          inputContainerStyle={styles.searchinputcontainer}
+          inputStyle={styles.searchinput}
+          placeholder="Search for an item ..."
+          onChangeText={(text) => handleSearch(text)}
+          onSubmitEditing={() => {
+            if (searchText.trim() !== "") {
+              // Navigate to SearchScreen only if the search text is not empty
+              navigation.navigate("SearchResult", {
+                searchedText: searchText,
+                products: filteredProducts.sort((a, b) => a.p - b.p),
+              });
+            }
+          }}
+          value={searchText}
+        />
 
-      {filteredProducts.length > 0 && (
-        <View style={styles.searchdropdownContainer}>
-          <FlatList
-            data={filteredProducts.slice(0, 100)}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.productItem}>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("Item", { item });
-                  }}
-                >
-                  <Text style={styles.productName}>{item.n}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+        {filteredProducts.length > 0 && (
+          <View style={styles.searchdropdownContainer}>
+            <FlatList
+              data={filteredProducts.slice(0, 100).sort((a, b) => a.p - b.p)}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.productItem}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate("Item", { item });
+                    }}
+                  >
+                    <Text style={styles.productName}>{item.n}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+          </View>
+        )}
+
+        <View style={styles.dealsContainer}>
+          <Text style={styles.dealconttext}>Best Deals</Text>
+          {/* <FontAwesome name="image" size={256} color="black" /> */}
+          <Image
+            source={{
+              with: 200,
+              height: 300,
+              uri: "https://picsum.photos/200/300",
+            }}
           />
         </View>
-      )}
-
-      <View style={styles.dealsContainer}>
-        <Text>Best Deals</Text>
-        <FontAwesome name="image" size={256} color="black" />
-        {/* <FlatList
-          data={filteredProducts.slice(0, 100)}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <Card containerStyle={styles.card}>
-              <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
-            </Card>
-          )}
-        /> */}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  linearGradient: {
     flex: 1,
-    backgroundColor: "#f0f0f0", // Adjust the background color
   },
   title: {
     fontSize: 40,
-    marginTop: 40,
-    marginBottom: 40,
+    marginTop: 20,
+    marginBottom: 20,
     alignSelf: "flex-start",
     padding: 20,
+    color: "white",
   },
   groupButton: {
     flexDirection: "row",
     width: "100%",
     justifyContent: "center",
-    flexWrap: "wrap",
+    backgroundColor: "#3B3B7F",
+    height: 80,
   },
   button: {
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderRadius: 3,
+    borderRadius: 10,
     width: "42%",
     height: 50,
-    backgroundColor: "#2F6DC3",
+    backgroundColor: "#6666FF",
     margin: 10,
     justifyContent: "center",
   },
@@ -192,21 +242,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   searchcontainer: {
-    backgroundColor: "#E2E8EE",
-    border: 0,
+    backgroundColor: "#3B3B7F",
+    borderWidth: 0,
   },
   searchinputcontainer: {
     backgroundColor: "#BEC5CE",
+    borderRadius: 30,
   },
   searchinput: {
     color: "black",
   },
   searchdropdownContainer: {
-    backgroundColor: "#E2E8EE",
+    backgroundColor: "#3B3B7F",
     borderRadius: 3,
     padding: 10,
     position: "absolute",
-    top: 302,
+    top: 270,
     zIndex: 1,
     width: "100%",
     borderColor: "gray",
@@ -219,20 +270,23 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   dealsContainer: {
-    marginTop: 10,
+    marginTop: 20,
     width: "90%",
-    backgroundColor: "white",
-    borderRadius: 3,
-    borderStyle: "solid",
+    backgroundColor: "#271936",
+    borderRadius: 20,
     borderColor: "darkgray",
-    borderWidth: 1,
     padding: 10,
-    height: "40%",
+    height: "55%",
     alignSelf: "center",
+  },
+  dealconttext: {
+    fontSize: 20,
+    color: "white",
+    marginBottom: 20,
   },
   productName: {
     fontSize: 16,
-    color: "black", //search text color
+    color: "white", //search text color
   },
 });
 
