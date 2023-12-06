@@ -11,6 +11,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Checkbox from "expo-checkbox";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function App({ navigation }) {
   const [email, setEmail] = useState("");
@@ -33,8 +34,13 @@ export default function App({ navigation }) {
       console.error("Error checking login status:", error);
     }
   };
-
   const handleLogin = () => {
+    // Check if email and password are not empty
+    if (!email || !password) {
+      Alert.alert("Validation Error", "Please enter both email and password.");
+      return;
+    }
+
     axios
       .post("http://localhost:3000/login", { email, password })
       .then((response) => {
@@ -44,16 +50,19 @@ export default function App({ navigation }) {
         // Set the 'isLoggedIn' flag in AsyncStorage to true
         AsyncStorage.setItem("isLoggedIn", "true");
 
-        // Set the 'isLoggedIn' flag in AsyncStorage to true
+        // Set other user data in AsyncStorage
         AsyncStorage.setItem("userId", response.data.userId);
-
-        // Set the 'isLoggedIn' flag in AsyncStorage to true
         AsyncStorage.setItem("email", response.data.email);
-
-        // Set the 'isLoggedIn' flag in AsyncStorage to true
         AsyncStorage.setItem("firstName", response.data.firstName);
+        AsyncStorage.setItem("lastName", response.data.lastName);
 
-        // You can perform navigation or set user state accordingly
+        // Show success alert
+        Alert.alert(
+          "Login Successful",
+          "You have been successfully logged in."
+        );
+
+        // Navigate to the Home screen
         navigation.navigate("Home");
       })
       .catch((error) => {
@@ -68,73 +77,78 @@ export default function App({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>Enter your email and password.</Text>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={(email) => setEmail(email)}
-        />
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Enter your password"
-          value={password}
-          secureTextEntry={!showPassword}
-          onChangeText={(password) => setPassword(password)}
-        />
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={{ position: "absolute", right: 10, top: 10 }}
-        >
-          <Icon
-            style={styles.passwordshowicon}
-            name={showPassword ? "eye" : "eye-slash"}
-            size={20}
-            color="black"
+    <LinearGradient
+      colors={["#371E57", "#0E1223"]}
+      style={styles.linearGradient}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Login</Text>
+        <Text style={styles.subtitle}>Enter your email and password.</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your email"
+            placeholderTextColor="gray"
+            value={email}
+            onChangeText={(email) => setEmail(email)}
           />
-        </TouchableOpacity>
-        <View style={styles.checkboxContainer}>
-          <Checkbox
-            style={styles.checkbox}
-            value={isChecked}
-            onValueChange={setChecked}
-            color={isChecked ? "#4630EB" : undefined}
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your password"
+            placeholderTextColor="gray"
+            value={password}
+            secureTextEntry={!showPassword}
+            onChangeText={(password) => setPassword(password)}
           />
-          <Text style={styles.checkboxLabel}>Keep me logged in</Text>
-        </View>
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-          <Text style={{ color: "white" }}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.forgotButton}>Forgot Password?</Text>
-        </TouchableOpacity>
-        <View style={styles.signupContainer}>
-          <Text style={styles.signupText}>Don't have an account?</Text>
           <TouchableOpacity
-            style={styles.signupButton}
-            onPress={() => navigation.navigate("Register")}
+            onPress={() => setShowPassword(!showPassword)}
+            style={{ position: "absolute", right: 10, top: 10 }}
           >
-            <Text style={styles.signupButton}>Sign up</Text>
+            <Icon
+              style={styles.passwordshowicon}
+              name={showPassword ? "eye" : "eye-slash"}
+              size={20}
+              color="black"
+            />
           </TouchableOpacity>
+          <View style={styles.checkboxContainer}>
+            <Checkbox
+              style={styles.checkbox}
+              value={isChecked}
+              onValueChange={setChecked}
+              color={isChecked ? "#4630EB" : undefined}
+            />
+            <Text style={styles.checkboxLabel}>Keep me logged in</Text>
+          </View>
+          <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+            <Text style={{ color: "white" }}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.forgotButton}>Forgot Password?</Text>
+          </TouchableOpacity>
+          <View style={styles.signupContainer}>
+            <Text style={styles.signupText}>Don't have an account?</Text>
+            <TouchableOpacity
+              style={styles.signupButton}
+              onPress={() => navigation.navigate("Register")}
+            >
+              <Text style={styles.signupButton}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  inputContainer: {
-    // flex: 1,
-    // backgroundColor: "#f0f0f0",
-    // // alignItems: "center",
-    // marginTop: 20,
-    // marginBottom: 20,
-    // paddingLeft: 15,
+  linearGradient: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
   },
   title: {
     fontSize: 40,
@@ -142,16 +156,19 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignSelf: "flex-start",
     padding: 20,
+    color: "white",
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
     paddingLeft: 20,
+    color: "white",
   },
   label: {
     marginBottom: 5,
     paddingLeft: 20,
     fontSize: 16,
+    color: "white",
   },
   textInput: {
     height: 40,
@@ -163,11 +180,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: "94%",
     alignSelf: "center",
+    color: "white",
   },
   passwordshowicon: {
     flex: 1,
     paddingTop: 120,
     paddingRight: 15,
+    color: "white",
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -180,6 +199,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 16,
     marginLeft: 5,
+    color: "white",
   },
   loginBtn: {
     width: "50%",
@@ -191,13 +211,13 @@ const styles = StyleSheet.create({
     marginTop: 30,
     backgroundColor: "#6666FF",
     marginBottom: 30,
-    // fontSize: 16,
   },
   forgotButton: {
     height: 30,
     marginBottom: 20,
     alignSelf: "center",
     fontSize: 16,
+    color: "white",
   },
   signupContainer: {
     flexDirection: "row",
@@ -207,6 +227,7 @@ const styles = StyleSheet.create({
   signupText: {
     marginRight: 5,
     fontSize: 16,
+    color: "white",
   },
   signupButton: {
     color: "#C87E61",
