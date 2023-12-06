@@ -292,7 +292,10 @@ function CreateListScreen({ navigation }) {
             )}
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleCreateList}>
+        <TouchableOpacity
+          style={styles.createlistbutton}
+          onPress={handleCreateList}
+        >
           <Text style={styles.buttonText}>Create List</Text>
         </TouchableOpacity>
       </View>
@@ -416,13 +419,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingLeft: 10,
     color: "grey",
+    paddingTop: 10,
   },
   itemlistbox: {
     height: 400,
   },
-  button: {
-    borderStyle: "solid",
-    borderWidth: 1,
+  createlistbutton: {
     borderRadius: 10,
     width: "42%",
     height: 50,
