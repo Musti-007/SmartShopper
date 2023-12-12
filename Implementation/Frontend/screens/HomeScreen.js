@@ -26,7 +26,8 @@ function HomeScreen({ navigation }) {
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    const data = await axios.get("http://192.168.1.218:3000/api/data");
+    // const data = await axios.get("http://192.168.1.218:3000/api/data");
+    const data = await axios.get("http://localhost:3000/api/data");
     // console.log("Data result: ", data.data);
 
     for (const section of data.data) {
@@ -105,6 +106,37 @@ function HomeScreen({ navigation }) {
       }
     })();
   }, []);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+
+  //     if (status !== "granted") {
+  //       console.log("Permission to access location was denied");
+  //       return;
+  //     }
+
+  //     let location = await Location.getCurrentPositionAsync({});
+
+  //     await AsyncStorage.setItem(
+  //       "location",
+  //       `${location.coords.latitude}, ${location.coords.longitude}`
+  //     );
+
+  //     const apiUrl = `https://nominatim.openstreetmap.org/search?q=supermarket+near+${location.coords.latitude}%2C+${location.coords.longitude}&limit=40&format=json`;
+
+  //     try {
+  //       const response = await axios.get(apiUrl);
+  //       const storeData = response.data;
+
+  //       const jsonData = JSON.stringify(storeData);
+  //       await AsyncStorage.setItem("supermarkets", jsonData);
+  //       setListOfSupermarkets(jsonData);
+  //     } catch (error) {
+  //       console.error("Error fetching supermarket data", error);
+  //     }
+  //   })();
+  // }, []);
 
   const handleListButtonPress = () => {
     if (isLoggedIn) {
