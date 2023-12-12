@@ -47,7 +47,8 @@ const SearchResultScreen = ({ route, navigation }) => {
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    const data = await axios.get("http://192.168.1.218:3000/api/data");
+    // const data = await axios.get("http://192.168.1.218:3000/api/data");
+    const data = await axios.get("http://localhost:3000/api/data");
 
     for (const section of data.data) {
       for (const product of section.d) {
@@ -92,7 +93,8 @@ const SearchResultScreen = ({ route, navigation }) => {
 
       // Fetch lists from the server using axios
       const response = await axios.get(
-        `http://192.168.1.218:3000/lists/${userID}`
+        // `http://192.168.1.218:3000/lists/${userID}`
+        `http://localhost:3000/lists/${userID}`
       );
       console.log(response.data);
       setLists(response.data);
@@ -106,7 +108,8 @@ const SearchResultScreen = ({ route, navigation }) => {
     console.log(selectedList);
     try {
       // Your API endpoint and data
-      const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
+      // const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
+      const endpoint = `http://localhost:3000/products/${selectedList.ListID}`;
       const data = {
         productName: item.n,
         price: item.p,

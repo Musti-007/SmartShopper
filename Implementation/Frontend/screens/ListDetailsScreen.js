@@ -23,7 +23,8 @@ function ListDetailsScreen({ route }) {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://192.168.1.218:3000/combinedData/${list.ListID}`
+          // `http://192.168.1.218:3000/combinedData/${list.ListID}`
+          `http://localhost:3000/combinedData/${list.ListID}`
         );
         setCombinedData(response.data);
       } catch (error) {
@@ -42,6 +43,9 @@ function ListDetailsScreen({ route }) {
 
         if (userLocation) {
           setUserLocation(userLocation);
+          console.log("====================================");
+          console.log(userLocation);
+          console.log("====================================");
         }
       } catch (error) {
         console.error("Error loading data from AsyncStorage:", error);
@@ -55,11 +59,12 @@ function ListDetailsScreen({ route }) {
     const coordinates1 = userLocation.split(",");
     const lat1 = parseFloat(coordinates1[0]);
     const lon1 = parseFloat(coordinates1[1]);
-
     const coordinates2 = location.split(",");
     const lat2 = parseFloat(coordinates2[0]);
     const lon2 = parseFloat(coordinates2[1]);
-
+    console.log("====================================");
+    console.log(coordinates2);
+    console.log("====================================");
     // Radius of the Earth in kilometers
     const R = 6371;
 
@@ -122,7 +127,7 @@ function ListDetailsScreen({ route }) {
                   <View style={styles.productTextContainer}>
                     <Text style={styles.productName}>{item.ProductName}</Text>
                     <Text style={styles.productDistance}>
-                      Distance: {calculateHaversineDistance(item.Location)} KM
+                      {calculateHaversineDistance(item.Location)} km
                     </Text>
                   </View>
                 </View>
@@ -130,6 +135,10 @@ function ListDetailsScreen({ route }) {
               </View>
             )}
           />
+        </View>
+        <View style={styles.totalPricebox}>
+          <Text style={styles.totalText}>Total: </Text>
+          <Text style={styles.totalPrice}>€{calculateTotal(combinedData)}</Text>
         </View>
         <TouchableOpacity
           style={styles.sharelistbutton}
@@ -161,7 +170,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   itemlistbox: {
-    height: 550,
+    height: 530,
   },
   listItem: {
     flexDirection: "row",
@@ -183,7 +192,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    width: "auto",
+    width: 250,
     color: "white",
   },
   productDistance: {
@@ -195,6 +204,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#C87E61",
     fontWeight: "bold",
+  },
+  totalPricebox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  totalText: {
+    alignSelf: "flex-start",
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingLeft: 20,
+  },
+  totalPrice: {
+    alignSelf: "flex-end",
+    color: "white",
+    fontSize: 26,
+    fontWeight: "bold",
+    paddingRight: 10,
   },
   sharelistbutton: {
     borderRadius: 10,
