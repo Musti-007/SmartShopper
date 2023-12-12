@@ -20,6 +20,29 @@ function HomeScreen({ navigation }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [listOfSuperMarkets, setListOfSupermarkets] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login status
+  const [bestDealProduct, setBestDealProduct] = useState(null);
+
+  const productList = [
+    {
+      id: 1,
+      name: "Product A",
+      price: 19.99,
+      imageUri: "https://example.com/productA.jpg",
+    },
+    {
+      id: 2,
+      name: "Product B",
+      price: 29.99,
+      imageUri: "https://example.com/productB.jpg",
+    },
+    {
+      id: 3,
+      name: "Product C",
+      price: 14.99,
+      imageUri: "https://example.com/productC.jpg",
+    },
+    // Add more products as needed
+  ];
 
   const handleSearch = async (text) => {
     setSearchText(text);
@@ -164,6 +187,18 @@ function HomeScreen({ navigation }) {
     }, [])
   );
 
+  // Function to pick a random product
+  const pickRandomProduct = () => {
+    const randomIndex = Math.floor(Math.random() * productList.length);
+    return productList[randomIndex];
+  };
+
+  // Effect to set the best deal product when the component mounts
+  useEffect(() => {
+    const randomProduct = pickRandomProduct();
+    setBestDealProduct(randomProduct);
+  }, []);
+
   return (
     <LinearGradient
       colors={["#371E57", "#0E1223"]}
@@ -224,17 +259,29 @@ function HomeScreen({ navigation }) {
             />
           </View>
         )}
-
+        <View style={styles.dealsContainer}>
+          <Text style={styles.dealconttext}>Best Deals</Text>
+          {bestDealProduct && (
+            <View style={styles.productContainer}>
+              <Text style={styles.productName}>{bestDealProduct.name}</Text>
+              <Image
+                style={styles.productImage}
+                source={{ uri: bestDealProduct.imageUri }}
+              />
+              <Text style={styles.productPrice}>€{bestDealProduct.price}</Text>
+            </View>
+          )}
+        </View>
         <View style={styles.dealsContainer}>
           <Text style={styles.dealconttext}>Best Deals</Text>
           {/* <FontAwesome name="image" size={256} color="black" /> */}
-          <Image
+          {/* <Image
             source={{
               with: 200,
               height: 300,
               uri: "https://picsum.photos/200/300",
             }}
-          />
+          /> */}
         </View>
       </View>
     </LinearGradient>
@@ -301,16 +348,16 @@ const styles = StyleSheet.create({
     borderColor: "gray",
     padding: 2,
   },
-  dealsContainer: {
-    marginTop: 20,
-    width: "90%",
-    backgroundColor: "#271936",
-    borderRadius: 20,
-    borderColor: "darkgray",
-    padding: 10,
-    height: "55%",
-    alignSelf: "center",
-  },
+  // dealsContainer: {
+  //   marginTop: 20,
+  //   width: "90%",
+  //   backgroundColor: "#271936",
+  //   borderRadius: 20,
+  //   borderColor: "darkgray",
+  //   padding: 10,
+  //   height: "55%",
+  //   alignSelf: "center",
+  // },
   dealconttext: {
     fontSize: 20,
     color: "white",
@@ -319,6 +366,38 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 16,
     color: "white", //search text color
+  },
+  dealsContainer: {
+    alignItems: "center",
+    marginTop: 50,
+    color: "white",
+  },
+  dealconttext: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "white",
+  },
+  productContainer: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    color: "white",
+  },
+  productName: {
+    fontSize: 18,
+    marginBottom: 5,
+    color: "white",
+  },
+  productImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 10,
+  },
+  productPrice: {
+    fontSize: 16,
+    color: "green",
   },
 });
 

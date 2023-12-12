@@ -104,17 +104,59 @@ const SearchResultScreen = ({ route, navigation }) => {
   };
 
   const handleButtonPress = async (item) => {
-    console.log(item);
-    console.log(selectedList);
     try {
+      // Check if a list is selected
+      if (!selectedList) {
+        console.log("Please select a list");
+        // Handle the case where a list is not selected (e.g., show a message to the user)
+        return;
+      }
+
+      if (lists.length === 0) {
+        try {
+          // Get the user ID from AsyncStorage
+          const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+
+          // Make a POST request to create a new list using Axios
+          const response = await axios.post("http://localhost:3000/lists", {
+            name: `List ${userID}`,
+            items: [item],
+            userId: userID,
+          });
+
+          // Assuming your API returns the created list in the response.data
+          const newList = response.data;
+        } catch (error) {
+          console.error("Error creating list:", error.message);
+          // Handle the error in a way that makes sense for your application
+        }
+
+        return;
+      }
+
+      const supermarkets = JSON.parse(
+        await AsyncStorage.getItem("supermarkets")
+      );
+      const storeLocation = supermarkets.find((supermarket) => {
+        if (
+          item.supermarket.toLowerCase() === "ah" &&
+          supermarket.name.toLowerCase() === "albert heijn"
+        ) {
+          return true;
+        } else if (
+          item.supermarket.toLowerCase() === supermarket.name.toLowerCase()
+        ) {
+          return true;
+        }
+      });
       // Your API endpoint and data
-      // const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
       const endpoint = `http://localhost:3000/products/${selectedList.ListID}`;
       const data = {
         productName: item.n,
         price: item.p,
         category: item.s,
-        storeName: item.c,
+        storeName: item.supermarket,
+        storeLocation: `${storeLocation.lat}, ${storeLocation.lon}`,
       };
 
       // Make a POST request to add a new entry
@@ -208,6 +250,7 @@ const SearchResultScreen = ({ route, navigation }) => {
                   </View>
 
                   <Text style={styles.supermarketName}>{item.c}</Text>
+
                   <RNPickerSelect
                     items={lists.map((list) => ({
                       label: list.ListName,

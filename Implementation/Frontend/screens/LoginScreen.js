@@ -68,7 +68,7 @@ export default function App({ navigation }) {
       })
       .catch((error) => {
         // Handle login error
-        console.error("Login failed:", error.response.data);
+        // console.error("Login failed:", error.response.data);
         Alert.alert(
           "Login Failed",
           "Please check your email and password and try again."
