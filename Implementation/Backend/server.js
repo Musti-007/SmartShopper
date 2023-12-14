@@ -163,10 +163,10 @@ app.delete("/lists/:id", (req, res) => {
 // Define the endpoint to create a new product for a specific ListID
 app.post("/products/:id", async (req, res) => {
   const listID = req.params.id;
-  const { productName, price, category, storeName } = req.body;
+  const { productName, price, category, storeName, storeLocation } = req.body;
 
   // Validate the incoming data
-  if (!productName || !price || !category || !storeName) {
+  if (!productName || !price || !category || !storeName || !storeLocation) {
     res.status(400).json({ error: "Product information is incomplete" });
     return;
   }
@@ -176,7 +176,7 @@ app.post("/products/:id", async (req, res) => {
 
     // Insert the new store into the stores table
     const storeQuery = "INSERT INTO stores (StoreName, Location) VALUES (?, ?)";
-    const storeValues = [storeName, "Some Location"];
+    const storeValues = [storeName, storeLocation];
 
     await db.run(storeQuery, storeValues, function (err) {
       if (err) {
