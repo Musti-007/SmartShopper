@@ -14,6 +14,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 import LoginScreen from "./screens/LoginScreen";
 import AccountScreen from "./screens/AccountScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import GetDirectionScreen from "./screens/GetDirectionScreen";
 
 const Stack = createStackNavigator();
 
@@ -89,6 +90,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Account" component={AccountScreen} />
+        <Stack.Screen name="GetDirection" component={GetDirectionScreen} />
         {/* Add ItemScreen */}
       </Stack.Navigator>
     </NavigationContainer>
