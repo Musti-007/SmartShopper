@@ -20,20 +20,56 @@ function ListDetailsScreen({ route }) {
   const [combinedData, setCombinedData] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadUserLocation = async () => {
       try {
-        const response = await axios.get(
-          // `http://192.168.1.218:3000/combinedData/${list.ListID}`
-          `http://localhost:3000/combinedData/${list.ListID}`
-        );
-        setCombinedData(response.data);
+        // Load user location from AsyncStorage
+        const location = await AsyncStorage.getItem("location");
+        if (location) {
+          setUserLocation(location);
+        }
       } catch (error) {
-        console.error("Error fetching combined data:", error);
+        console.error("Error loading user location:", error);
       }
     };
 
-    fetchData();
-  }, [list.ListID]);
+    loadUserLocation();
+  }, []);
+
+  useEffect(() => {
+    // Fetch data only if user location is available
+    if (userLocation) {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get(
+            `http://192.168.1.218:3000/combinedData/${list.ListID}`
+          );
+          const itemsWithDistances = await Promise.all(
+            response.data.map(async (item) => {
+              try {
+                const distance = await calculateRouteDistance(
+                  userLocation,
+                  item.Location
+                );
+                return { ...item, distance };
+              } catch (error) {
+                console.error(
+                  "Error calculating distance for item:",
+                  item,
+                  error.message
+                );
+                return { ...item, distance: "Error" };
+              }
+            })
+          );
+          setCombinedData(itemsWithDistances);
+        } catch (error) {
+          console.error("Error fetching combined data:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [userLocation, list.ListID]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,9 +79,7 @@ function ListDetailsScreen({ route }) {
 
         if (userLocation) {
           setUserLocation(userLocation);
-          console.log("====================================");
           console.log(userLocation);
-          console.log("====================================");
         }
       } catch (error) {
         console.error("Error loading data from AsyncStorage:", error);
@@ -55,42 +89,35 @@ function ListDetailsScreen({ route }) {
     loadData();
   }, []);
 
-  function calculateHaversineDistance(location) {
-    const coordinates1 = userLocation.split(",");
-    const lat1 = parseFloat(coordinates1[0]);
-    const lon1 = parseFloat(coordinates1[1]);
-    const coordinates2 = location.split(",");
-    const lat2 = parseFloat(coordinates2[0]);
-    const lon2 = parseFloat(coordinates2[1]);
-    console.log("====================================");
-    console.log(coordinates2);
-    console.log("====================================");
-    // Radius of the Earth in kilometers
-    const R = 6371;
+  async function calculateRouteDistance(sourceLocation, destinationLocation) {
+    const osrmEndpoint = "http://router.project-osrm.org/route/v1/driving/";
+    const coordinates1 = sourceLocation.split(",");
+    const coordinates2 = destinationLocation.split(",");
+    console.log("coordinate1 ", coordinates1);
+    console.log("coordinate2 ", coordinates2);
+    const url = `${osrmEndpoint}${coordinates1[1].trim()},${
+      coordinates1[0]
+    };${coordinates2[1].trim()},${coordinates2[0]}?overview=false`;
+    console.log(url);
+    try {
+      const response = await axios.get(url);
 
-    // Convert latitude and longitude from degrees to radians
-    const radLat1 = (lat1 * Math.PI) / 180;
-    const radLon1 = (lon1 * Math.PI) / 180;
-    const radLat2 = (lat2 * Math.PI) / 180;
-    const radLon2 = (lon2 * Math.PI) / 180;
+      if (response.data.code !== "Ok") {
+        throw new Error("No route found.");
+      }
 
-    // Calculate differences in coordinates
-    const dLat = radLat2 - radLat1;
-    const dLon = radLon2 - radLon1;
+      const distanceInMeters = response.data.routes[0].distance;
 
-    // Haversine formula
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(radLat1) *
-        Math.cos(radLat2) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    // Distance in kilometers
-    const distance = R * c;
-
-    return distance.toFixed(2);
+      if (distanceInMeters < 1000) {
+        return `${distanceInMeters.toFixed(2)} m`;
+      } else {
+        const distanceInKilometers = distanceInMeters / 1000;
+        return `${distanceInKilometers.toFixed(2)} km`;
+      }
+    } catch (error) {
+      console.error("Error calculating route distance:", error.message);
+      throw error;
+    }
   }
 
   const calculateTotal = (data) => {
@@ -126,12 +153,12 @@ function ListDetailsScreen({ route }) {
                   />
                   <View style={styles.productTextContainer}>
                     <Text style={styles.productName}>{item.ProductName}</Text>
-                    <Text style={styles.productDistance}>
-                      {calculateHaversineDistance(item.Location)} km
-                    </Text>
+                    <Text style={styles.productDistance}>{item.distance}</Text>
                   </View>
                 </View>
-                <Text style={styles.productPrice}>€{item.Price}</Text>
+                <Text style={styles.productPrice}>
+                  €{item.Price.toFixed(2)}
+                </Text>
               </View>
             )}
           />
@@ -140,12 +167,22 @@ function ListDetailsScreen({ route }) {
           <Text style={styles.totalText}>Total: </Text>
           <Text style={styles.totalPrice}>€{calculateTotal(combinedData)}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.sharelistbutton}
-          onPress={() => "" /* Add your logic for sharing */}
-        >
-          <Text style={styles.buttonText}>Share List</Text>
-        </TouchableOpacity>
+        <View style={styles.groupbutton}>
+          <TouchableOpacity
+            style={styles.sharelistbutton}
+            onPress={() =>
+              navigation.navigate("GetDirection", { combinedData })
+            }
+          >
+            <Text style={styles.buttonText}>Get Direction</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sharelistbutton}
+            onPress={() => "" /* Add your logic for sharing */}
+          >
+            <Text style={styles.buttonText}>Share List</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </LinearGradient>
   );
@@ -170,7 +207,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   itemlistbox: {
-    height: 530,
+    height: 520,
   },
   listItem: {
     flexDirection: "row",
@@ -223,6 +260,13 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "bold",
     paddingRight: 10,
+  },
+  groupbutton: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "center",
+    backgroundColor: "#3B3B7F",
+    height: 80,
   },
   sharelistbutton: {
     borderRadius: 10,

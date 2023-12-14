@@ -42,8 +42,8 @@ export default function App({ navigation }) {
     }
 
     axios
-      // .post("http://192.168.1.218:3000/login", { email, password })
-      .post("http://localhost:3000/login", { email, password })
+      .post("http://192.168.1.218:3000/login", { email, password })
+      //   .post("http://localhost:3000/login", { email, password })
       .then((response) => {
         // Handle successful login response
         console.log("Login successful:", response.data);

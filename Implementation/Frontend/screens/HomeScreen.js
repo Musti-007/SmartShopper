@@ -44,25 +44,42 @@ function HomeScreen({ navigation }) {
     // Add more products as needed
   ];
 
+  const checkIfSupermarketExists = (supermarket, section) => {
+    if (
+      supermarket.name.toLowerCase().includes("Albert Heijn".toLowerCase()) &&
+      section.c.toLowerCase() === "ah"
+    ) {
+      return true;
+    }
+
+    return supermarket.name.toLowerCase().includes(section.c.toLowerCase());
+  };
+
   const handleSearch = async (text) => {
     setSearchText(text);
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    // const data = await axios.get("http://192.168.1.218:3000/api/data");
-    const data = await axios.get("http://localhost:3000/api/data");
+    const data = await axios.get("http://192.168.1.218:3000/api/data");
+    // const data = await axios.get("http://localhost:3000/api/data");
     // console.log("Data result: ", data.data);
 
     for (const section of data.data) {
-      for (const product of section.d) {
-        if (product.n.toLowerCase().includes(searchTextLower)) {
-          filteredItems.push({
-            n: product.n,
-            p: product.p,
-            c: section.c,
-            i: section.i,
-            s: product.s,
-          });
+      if (
+        listOfSuperMarkets.some((supermarket) =>
+          checkIfSupermarketExists(supermarket, section)
+        )
+      ) {
+        for (const product of section.d) {
+          if (product.n.toLowerCase().includes(searchTextLower)) {
+            filteredItems.push({
+              n: product.n,
+              p: product.p,
+              supermarket: section.c,
+              i: section.i,
+              s: product.s,
+            });
+          }
         }
       }
     }
@@ -110,7 +127,7 @@ function HomeScreen({ navigation }) {
       if (storedData) {
         // Data is already stored, no need to make the request again
         console.log("Data already exists:", storedData);
-        setListOfSupermarkets(storedData);
+        setListOfSupermarkets(JSON.parse(storedData));
         return;
       } // Fetch supermarket data using OpenStreetMap Nominatim API with axios
 
@@ -123,7 +140,7 @@ function HomeScreen({ navigation }) {
         const jsonData = JSON.stringify(storeData);
         console.log("Setting new data");
         await AsyncStorage.setItem("supermarkets", jsonData);
-        setListOfSupermarkets(jsonData);
+        setListOfSupermarkets(JSON.parse(jsonData));
       } catch (error) {
         console.error("Error fetching supermarket data", error);
       }
@@ -327,6 +344,8 @@ const styles = StyleSheet.create({
   searchinputcontainer: {
     backgroundColor: "#BEC5CE",
     borderRadius: 30,
+    width: "95%",
+    alignSelf: "center",
   },
   searchinput: {
     color: "black",

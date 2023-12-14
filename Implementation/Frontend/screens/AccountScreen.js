@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign } from "@expo/vector-icons";
@@ -54,8 +55,8 @@ const AccountScreen = ({ navigation }) => {
       const storedUserId = await AsyncStorage.getItem("userId");
 
       // Save the updated user information to the server
-      // await axios.put(`http://192.168.1.218:3000/users/${storedUserId}`, {
-      await axios.put(`http://localhost:3000/users/${storedUserId}`, {
+      await axios.put(`http://192.168.1.218:3000/users/${storedUserId}`, {
+        //   await axios.put(`http://localhost:3000/users/${storedUserId}`, {
         firstName,
         lastName,
         email,
@@ -79,7 +80,10 @@ const AccountScreen = ({ navigation }) => {
       >
         <AntDesign name="left" size={24} color="white" />
       </TouchableOpacity>
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Text style={styles.greetingText}>Welcome, {firstName}!</Text>
         </View>
@@ -114,7 +118,7 @@ const AccountScreen = ({ navigation }) => {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
-            editable={false} // Email is not editable in this example
+            editable={false}
           />
         </View>
         <View style={styles.groupbutton}>
@@ -128,7 +132,7 @@ const AccountScreen = ({ navigation }) => {
             <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 };
@@ -136,6 +140,7 @@ const AccountScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   linearGradient: {
     flex: 1,
+    height: "100%",
   },
   backButton: {
     position: "absolute",

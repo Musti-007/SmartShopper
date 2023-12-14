@@ -88,24 +88,41 @@ function CreateListScreen({ navigation }) {
     setFilteredProducts(sortedProducts);
   };
 
+  const checkIfSupermarketExists = (supermarket, section) => {
+    if (
+      supermarket.name.toLowerCase().includes("Albert Heijn".toLowerCase()) &&
+      section.c.toLowerCase() === "ah"
+    ) {
+      return true;
+    }
+
+    return supermarket.name.toLowerCase().includes(section.c.toLowerCase());
+  };
+
   const handleSearch = async (text) => {
     setItemName(text);
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    // const data = await axios.get("http://192.168.1.218:3000/api/data");
-    const data = await axios.get("http://localhost:3000/api/data");
+    const data = await axios.get("http://192.168.1.218:3000/api/data");
+    // const data = await axios.get("http://localhost:3000/api/data");
 
     for (const section of data.data) {
-      for (const product of section.d) {
-        if (product.n.toLowerCase().includes(searchTextLower)) {
-          filteredItems.push({
-            n: product.n,
-            s: product.s,
-            p: product.p,
-            i: section.i,
-            supermarket: section.c,
-          });
+      if (
+        supermarkets.some((supermarket) =>
+          checkIfSupermarketExists(supermarket, section)
+        )
+      ) {
+        for (const product of section.d) {
+          if (product.n.toLowerCase().includes(searchTextLower)) {
+            filteredItems.push({
+              n: product.n,
+              s: product.s,
+              p: product.p,
+              i: section.i,
+              supermarket: section.c,
+            });
+          }
         }
       }
     }
@@ -131,8 +148,10 @@ function CreateListScreen({ navigation }) {
   const handleItemPress = (item) => {
     const foundSupermarket = supermarkets.find((supermarket) => {
       if (
-        item.supermarket.toLowerCase() === "ah" &&
-        supermarket.name.toLowerCase() === "albert heijn"
+        (item.supermarket.toLowerCase() === "ah" &&
+          supermarket.name.toLowerCase() === "albert heijn") ||
+        (item.supermarket.toLowerCase() === "janlinders" &&
+          supermarket.name.toLowerCase() === "jan linders")
       ) {
         return supermarket.name;
       } else if (
@@ -149,6 +168,7 @@ function CreateListScreen({ navigation }) {
           name: item.n,
           price: item.p,
           store: item.supermarket,
+          description: item.s,
           location: `${foundSupermarket.lat}, ${foundSupermarket.lon}`,
         },
       ]);
@@ -175,8 +195,8 @@ function CreateListScreen({ navigation }) {
       const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
 
       // Make a POST request to create a new list using Axios
-      // const response = await axios.post("http://192.168.1.218:3000/lists", {
-      const response = await axios.post("http://localhost:3000/lists", {
+      const response = await axios.post("http://192.168.1.218:3000/lists", {
+        //   const response = await axios.post("http://localhost:3000/lists", {
         name: listName,
         items: items,
         userId: userID,
@@ -209,6 +229,7 @@ function CreateListScreen({ navigation }) {
         >
           <AntDesign name="left" size={24} color="white" />
         </TouchableOpacity>
+
         <Text style={styles.title}>Create Grocery List</Text>
         <View style={styles.filterContainer}>
           <RNPickerSelect
@@ -271,7 +292,9 @@ function CreateListScreen({ navigation }) {
                       <Text style={styles.productName}>{item.n}</Text>
                       <Text style={styles.description}>{item.s}</Text>
                     </View>
-                    <Text style={styles.productPrice}>€{item.p}</Text>
+                    <Text style={styles.productPrice}>
+                      €{item.p.toFixed(2)}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               )}
@@ -297,6 +320,7 @@ function CreateListScreen({ navigation }) {
         <TouchableOpacity
           style={styles.createlistbutton}
           onPress={handleCreateList}
+          disabled={!listName.trim()}
         >
           <Text style={styles.buttonText}>Create List</Text>
         </TouchableOpacity>
@@ -424,7 +448,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   itemlistbox: {
-    height: 400,
+    height: 300,
   },
   createlistbutton: {
     borderRadius: 10,
