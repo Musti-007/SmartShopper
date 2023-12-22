@@ -5,12 +5,14 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Share,
 } from "react-native";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import Mail from "react-native-mail";
 
 function ListDetailsScreen({ route }) {
   const { list } = route.params;
@@ -18,21 +20,31 @@ function ListDetailsScreen({ route }) {
 
   const [userLocation, setUserLocation] = useState("");
   const [combinedData, setCombinedData] = useState([]);
+  const [userEmail, setUserEmail] = useState(""); // Added state for userEmail
 
   useEffect(() => {
-    const loadUserLocation = async () => {
+    const loadData = async () => {
       try {
-        // Load user location from AsyncStorage
+        // Load user location and email from AsyncStorage
         const location = await AsyncStorage.getItem("location");
+        const email = await AsyncStorage.getItem("userEmail");
+
         if (location) {
           setUserLocation(location);
         }
+
+        if (email) {
+          setUserEmail(email);
+        } else {
+          // Dummy email for testing
+          setUserEmail("test@example.com");
+        }
       } catch (error) {
-        console.error("Error loading user location:", error);
+        console.error("Error loading data from AsyncStorage:", error);
       }
     };
 
-    loadUserLocation();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -41,7 +53,8 @@ function ListDetailsScreen({ route }) {
       const fetchData = async () => {
         try {
           const response = await axios.get(
-            `http://192.168.1.218:3000/combinedData/${list.ListID}`
+            // `http://192.168.1.218:3000/combinedData/${list.ListID}`
+            `http://localhost:3000/combinedData/${list.ListID}`
           );
           const itemsWithDistances = await Promise.all(
             response.data.map(async (item) => {
@@ -71,34 +84,14 @@ function ListDetailsScreen({ route }) {
     }
   }, [userLocation, list.ListID]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Load previously saved listName and items from AsyncStorage
-        const userLocation = await AsyncStorage.getItem("location");
-
-        if (userLocation) {
-          setUserLocation(userLocation);
-          console.log(userLocation);
-        }
-      } catch (error) {
-        console.error("Error loading data from AsyncStorage:", error);
-      }
-    };
-
-    loadData();
-  }, []);
-
   async function calculateRouteDistance(sourceLocation, destinationLocation) {
     const osrmEndpoint = "http://router.project-osrm.org/route/v1/driving/";
     const coordinates1 = sourceLocation.split(",");
     const coordinates2 = destinationLocation.split(",");
-    console.log("coordinate1 ", coordinates1);
-    console.log("coordinate2 ", coordinates2);
     const url = `${osrmEndpoint}${coordinates1[1].trim()},${
       coordinates1[0]
     };${coordinates2[1].trim()},${coordinates2[0]}?overview=false`;
-    console.log(url);
+
     try {
       const response = await axios.get(url);
 
@@ -123,6 +116,44 @@ function ListDetailsScreen({ route }) {
   const calculateTotal = (data) => {
     const total = data.reduce((acc, item) => acc + item.Price, 0);
     return total.toFixed(2); // Assuming Price is a floating-point number
+  };
+
+  const saveUserEmail = async (email) => {
+    try {
+      await AsyncStorage.setItem("userEmail", email);
+    } catch (error) {
+      console.error("Error saving user email:", error);
+    }
+  };
+
+  const handleShareListPress = async () => {
+    try {
+      // Check if the user's email address is available
+      console.log("User Email:", userEmail);
+
+      if (userEmail) {
+        const shareOptions = {
+          message: generateShareMessage(combinedData, userEmail),
+          url: "", // Add URL if needed
+        };
+
+        const result = await Share.share(shareOptions);
+        console.log(result);
+      } else {
+        console.error("User email address is null or undefined");
+      }
+    } catch (error) {
+      console.error("Error sharing list:", error.message);
+    }
+  };
+
+  const generateShareMessage = (data, userEmail) => {
+    const items = data.map(
+      (item) => `${item.ProductName}: €${item.Price.toFixed(2)}`
+    );
+    const total = `Total: €${calculateTotal(data)}`;
+
+    return `User Email: ${userEmail}\n\n${items.join("\n")}\n\n${total}`;
   };
 
   return (
@@ -178,7 +209,7 @@ function ListDetailsScreen({ route }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.sharelistbutton}
-            onPress={() => "" /* Add your logic for sharing */}
+            onPress={handleShareListPress}
           >
             <Text style={styles.buttonText}>Share List</Text>
           </TouchableOpacity>
