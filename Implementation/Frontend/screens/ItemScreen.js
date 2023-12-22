@@ -13,6 +13,46 @@ const ItemScreen = ({ route }) => {
   const navigation = useNavigation();
   const [selectedList, setSelectedList] = useState(null);
   const [lists, setLists] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
+  const fetchData = async (newProducts) => {
+    try {
+      const promises = newProducts.map(async (item) => {
+        try {
+          const response = await axios.get(
+            // `http://192.168.1.218:3000/api/productSearch?query=${encodeURIComponent(
+            `http://localhost:3000/api/productSearch?query=${encodeURIComponent(
+              item.n
+            )}`
+          );
+          const productImages = response.data.productImages;
+
+          console.log(`Fetched images for product ${item.n}:`, productImages);
+
+          return {
+            ...item,
+            imageURL: productImages[productImages.length - 1].url,
+          };
+        } catch (error) {
+          console.error("Error fetching data:", error.message);
+          return { ...item, imageURL: item.i };
+        }
+      });
+
+      const updatedProducts = await Promise.all(promises);
+
+      setFilteredProducts(updatedProducts);
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    let sortedProducts = [...filteredProducts];
+
+    setFilteredProducts(sortedProducts.slice(0, 10));
+    fetchData(sortedProducts.slice(0, 10));
+  }, []);
 
   useEffect(() => {
     // Fetch lists from the server when the component mounts
@@ -25,10 +65,10 @@ const ItemScreen = ({ route }) => {
 
       // Fetch lists from the server using axios
       const response = await axios.get(
-        `http://192.168.1.218:3000/lists/${userID}`
-        // `http://localhost:3000/lists/${userID}`
+        // `http://192.168.1.218:3000/lists/${userID}`
+        `http://localhost:3000/lists/${userID}`
       );
-      console.log(response.data);
+      //   console.log(response.data);
       setLists(response.data);
     } catch (error) {
       console.error("Error fetching lists:", error.message);
@@ -37,18 +77,18 @@ const ItemScreen = ({ route }) => {
 
   const handleButtonPress = async (item) => {
     console.log(item);
-    console.log(selectedList);
+    // console.log(selectedList);
     try {
       // Your API endpoint and data
-      const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
-      //   const endpoint = `http://localhost:3000/products/${selectedList.ListID}`;
+      // const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
+      const endpoint = `http://localhost:3000/products/${selectedList.ListID}`;
       const data = {
         productName: item.n,
         price: item.p,
         category: item.s,
         storeName: item.c,
       };
-
+      console.log("Request Data:", data);
       // Make a POST request to add a new entry
       const response = await axios.post(endpoint, data);
 
@@ -76,15 +116,18 @@ const ItemScreen = ({ route }) => {
         </TouchableOpacity>
         <Card containerStyle={styles.card}>
           {/* Top part of the card for the picture */}
-          <Card.Image source={{ uri: item.i }} style={styles.cardImage} />
+          <Card.Image
+            source={{ uri: item.imageURL }}
+            style={styles.cardImage}
+          />
           {/* Top left on the picture: Name of the supermarket */}
-          <Text style={styles.supermarketName}>{item.c.toUpperCase()}</Text>
+          <Text style={styles.supermarketName}>{item.c}</Text>
           <View style={styles.infoNamePrice}>
             {/* Below the picture to the left: Name of the item */}
             <Text style={styles.productName}>{item.n}</Text>
             {/* Bottom of the card: Price and Add to List button */}
             <View style={styles.bottomContainer}>
-              <Text style={styles.productPrice}>€{item.p}</Text>
+              <Text style={styles.productPrice}>€{item.p.toFixed(2)}</Text>
             </View>
           </View>
           <RNPickerSelect
@@ -157,7 +200,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   cardImage: {
-    height: 300,
+    height: 450,
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
   },
@@ -167,6 +210,9 @@ const styles = StyleSheet.create({
     left: 5,
     fontSize: 10,
     color: "white",
+    backgroundColor: "gray",
+    borderRadius: 5,
+    padding: 2,
   },
   infoNamePrice: {
     padding: 10,
@@ -180,7 +226,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   productPrice: {
-    fontSize: 14,
+    fontSize: 18,
     color: "#C87E61", // Blue color for the price
     paddingTop: 10,
     fontWeight: "bold",
