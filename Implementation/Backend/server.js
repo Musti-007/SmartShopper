@@ -2,7 +2,7 @@ const express = require("express");
 const sqlite3 = require("sqlite3");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-
+const axios = require("axios");
 const app = express();
 const port = 3000;
 
@@ -21,7 +21,6 @@ createTablesQueries.forEach((query) => {
     if (err) {
       console.error(err);
     } else {
-      console.log("Table created successfully");
     }
   });
 });
@@ -30,6 +29,107 @@ app.use(express.json());
 app.use(cors());
 
 const jsonData = require("./data/supermarkets.json");
+
+// Function to get authentication token
+async function getAuthToken() {
+  const data = {
+    clientId: "appie",
+    // Include other fields if needed
+  };
+
+  const headers = {
+    "User-Agent": "Appie/8.22.3",
+    "Content-Type": "application/json",
+    "X-Application": "AHWEBSHOP",
+  };
+
+  try {
+    const response = await axios.post(
+      "https://api.ah.nl/mobile-auth/v1/auth/token/anonymous",
+      data,
+      { headers, responseType: "json" }
+    );
+    console.log("Token:", response.data.access_token);
+    return response.data.access_token;
+  } catch (error) {
+    console.error("Error getting token:", error.message);
+    console.error("Response data:", error.response.data);
+    throw error;
+  }
+}
+
+// Function to make product search request using the token
+async function getProductSearch(token, query) {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "X-Application": "AHWEBSHOP",
+  };
+
+  try {
+    const response = await axios.get(
+      `https://api.ah.nl/mobile-services/product/search/v2?query=${query}&sortOn=RELEVANCE`,
+      { headers, responseType: "json" }
+    );
+    const images = response.data.products[0].images;
+    if (images) {
+      return images;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error making product search request:", error.message);
+    return [];
+  }
+}
+
+// Function to perform the usage
+async function performProductSearch(query) {
+  try {
+    const authToken = await getAuthToken();
+    // Use the obtained token for subsequent requests
+    const productImages = await getProductSearch(
+      authToken,
+      encodeURIComponent(query)
+    );
+
+    // Check if the result is empty and return an empty list if so
+    if (!productImages || productImages.length === 0) {
+      console.log("No product images found for query:", query);
+      return [];
+    }
+
+    return productImages;
+  } catch (error) {
+    // Log the error for debugging purposes
+    console.error("An error occurred:", error);
+
+    // Return an empty list instead of throwing an error
+    return [];
+  }
+}
+
+// // // Usage
+// (async () => {
+// 	try {
+// 		const authToken = await getAuthToken();
+// 		// Use the obtained token for subsequent requests
+// 		await getProductSearch(authToken, encodeURIComponent('sdfsdfsdfsdf'));
+// 		// await getProductSearch(authToken, 'g%27woon%20Koolzuurvrij%20Mineraalwater%20500%20ml');
+// 	} catch (error) {
+// 		console.error('An error occurred:', error);
+// 	}
+// })();
+
+// Express endpoint for performing product search
+app.get("/api/productSearch", async (req, res) => {
+  const query = req.query.query || ""; // Get query parameter from request
+  try {
+    const productImages = await performProductSearch(query);
+    res.json({ productImages });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred during product search." });
+  }
+});
 
 app.post("/lists", (req, res) => {
   const { name, items, userId } = req.body;
