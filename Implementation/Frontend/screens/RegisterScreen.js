@@ -32,8 +32,8 @@ export default function RegisterScreen({ navigation }) {
     }
 
     axios
-      .post("http://192.168.1.218:3000/users", {
-        //   .post("http://localhost:3000/users", {
+      // .post("http://192.168.1.218:3000/users", {
+      .post("http://localhost:3000/users", {
         firstName,
         lastName,
         email,
@@ -86,7 +86,7 @@ export default function RegisterScreen({ navigation }) {
             style={styles.input}
             placeholder="Email"
             placeholderTextColor="gray"
-            value={email}
+            value={email.toLowerCase()}
             onChangeText={(text) => setEmail(text)}
           />
           <TextInput
