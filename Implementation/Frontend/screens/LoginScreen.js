@@ -12,12 +12,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Checkbox from "expo-checkbox";
 import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function App({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isChecked, setChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Clear the email state when the screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      setEmail("");
+      setPassword("");
+    }, [])
+  );
 
   useEffect(() => {
     checkLoggedInStatus();
@@ -42,8 +51,8 @@ export default function App({ navigation }) {
     }
 
     axios
-      .post("http://192.168.1.218:3000/login", { email, password })
-      //   .post("http://localhost:3000/login", { email, password })
+      // .post("http://192.168.1.218:3000/login", { email, password })
+      .post("http://localhost:3000/login", { email, password })
       .then((response) => {
         // Handle successful login response
         console.log("Login successful:", response.data);
@@ -56,12 +65,6 @@ export default function App({ navigation }) {
         AsyncStorage.setItem("email", response.data.email);
         AsyncStorage.setItem("firstName", response.data.firstName);
         AsyncStorage.setItem("lastName", response.data.lastName);
-
-        // Show success alert
-        Alert.alert(
-          "Login Successful",
-          "You have been successfully logged in."
-        );
 
         // Navigate to the Home screen
         navigation.navigate("Home");
@@ -91,7 +94,7 @@ export default function App({ navigation }) {
             style={styles.textInput}
             placeholder="Enter your email"
             placeholderTextColor="gray"
-            value={email}
+            value={email.toLowerCase()}
             onChangeText={(email) => setEmail(email)}
           />
           <Text style={styles.label}>Password</Text>
