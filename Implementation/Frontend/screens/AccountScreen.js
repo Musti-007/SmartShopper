@@ -55,8 +55,8 @@ const AccountScreen = ({ navigation }) => {
       const storedUserId = await AsyncStorage.getItem("userId");
 
       // Save the updated user information to the server
-      await axios.put(`http://192.168.1.218:3000/users/${storedUserId}`, {
-        //   await axios.put(`http://localhost:3000/users/${storedUserId}`, {
+      // await axios.put(`http://192.168.1.218:3000/users/${storedUserId}`, {
+      await axios.put(`http://localhost:3000/users/${storedUserId}`, {
         firstName,
         lastName,
         email,
