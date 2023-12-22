@@ -55,13 +55,72 @@ const SearchResultScreen = ({ route, navigation }) => {
     return supermarket.name.toLowerCase().includes(section.c.toLowerCase());
   };
 
-  const handleSearch = async (text) => {
-    setSearchText(text);
+  const fetchData = async (newProducts) => {
+    try {
+      const promises = newProducts.map(async (item) => {
+        try {
+          const response = await axios.get(
+            // `http://192.168.1.218:3000/api/productSearch?query=${encodeURIComponent(
+            `http://localhost:3000/api/productSearch?query=${encodeURIComponent(
+              item.n
+            )}`
+          );
+          const productImages = response.data.productImages;
 
-    const searchTextLower = text.toLowerCase();
+          console.log(`Fetched images for product ${item.n}:`, productImages);
+
+          const imageURL =
+            response.data.productImages.length > 0
+              ? response.data.productImages[
+                  response.data.productImages.length - 1
+                ].url
+              : item.i;
+
+          return {
+            ...item,
+            imageURL: imageURL,
+          };
+        } catch (error) {
+          console.error("Error fetching data:", error.message);
+          return { ...item, imageURL: item.i };
+        }
+      });
+
+      const updatedProducts = await Promise.all(promises);
+
+      setFilteredProducts(updatedProducts);
+    } catch (error) {
+      console.error("An error occurred:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    let sortedProducts = [...filteredProducts];
+    if (selectedOption === "supermarket") {
+      console.log("Sorting by supermarket");
+      sortedProducts.sort((a, b) => a.supermarket.localeCompare(b.supermarket));
+    } else if (selectedOption === "price") {
+      console.log("Sorting by price");
+      sortedProducts.sort((a, b) => a.p - b.p);
+    } else if (selectedOption === "name") {
+      console.log("Sorting by name");
+      sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
+    }
+
+    setFilteredProducts(sortedProducts.slice(0, 10));
+    fetchData(sortedProducts.slice(0, 10));
+  }, []);
+
+  const handleSearch = async () => {
+    if (searchText.trim() === "") {
+      setFilteredProducts([]);
+      return;
+    }
+
+    const searchTextLower = searchText.toLowerCase();
     const filteredItems = [];
-    const data = await axios.get("http://192.168.1.218:3000/api/data");
-    // const data = await axios.get("http://192.168.1.146:3000/api/data");
+    // const data = await axios.get("http://192.168.1.218:3000/api/data");
+    const data = await axios.get("http://localhost:3000/api/data");
 
     for (const section of data.data) {
       if (
@@ -85,10 +144,7 @@ const SearchResultScreen = ({ route, navigation }) => {
         console.log("this is removed ", section.c);
       }
     }
-    if (text.trim() === "") {
-      setFilteredProducts([]);
-      return;
-    }
+
     if (selectedOption === "supermarket") {
       console.log("Sorting by supermarket");
       filteredItems.sort((a, b) => a.supermarket.localeCompare(b.supermarket));
@@ -99,8 +155,9 @@ const SearchResultScreen = ({ route, navigation }) => {
       console.log("Sorting by name");
       filteredItems.sort((a, b) => a.n.localeCompare(b.n));
     }
+    setFilteredProducts(filteredItems.slice(0, 10));
 
-    setFilteredProducts(filteredItems);
+    fetchData(filteredItems.slice(0, 10));
   };
 
   useEffect(() => {
@@ -118,8 +175,8 @@ const SearchResultScreen = ({ route, navigation }) => {
       }
       // Fetch lists from the server using axios
       const response = await axios.get(
-        `http://192.168.1.218:3000/lists/${userID}`
-        // `http://localhost:3000/lists/${userID}`
+        // `http://192.168.1.218:3000/lists/${userID}`
+        `http://localhost:3000/lists/${userID}`
       );
       console.log(response.data);
       setLists(response.data);
@@ -137,7 +194,8 @@ const SearchResultScreen = ({ route, navigation }) => {
           const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
 
           // Make a POST request to create a new list using Axios
-          const response = await axios.post("http://192.168.1.218:3000/lists", {
+          // const response = await axios.post("http://192.168.1.218:3000/lists", {
+          const response = await axios.post("http://localhost/lists", {
             name: `List ${userID}`,
             items: [item],
             userId: userID,
@@ -176,7 +234,8 @@ const SearchResultScreen = ({ route, navigation }) => {
         }
       });
       // Your API endpoint and data
-      const endpoint = `http://192.168.1.218:3000/products/${selectedLists[index].ListID}`;
+      // const endpoint = `http://192.168.1.218:3000/products/${selectedLists[index].ListID}`;
+      const endpoint = `http://localhost:3000/products/${selectedLists[index].ListID}`;
       const data = {
         productName: item.n,
         price: item.p,
@@ -209,15 +268,8 @@ const SearchResultScreen = ({ route, navigation }) => {
           inputContainerStyle={styles.searchinputcontainer}
           inputStyle={styles.searchinput}
           placeholder="Search for an item ..."
-          onChangeText={(text) => handleSearch(text)}
-          onSubmitEditing={() => {
-            if (searchText.trim() !== "") {
-              navigation.navigate("SearchResult", {
-                searchText,
-                filteredProducts,
-              });
-            }
-          }}
+          onChangeText={(text) => setSearchText(text)}
+          onSubmitEditing={handleSearch}
           value={searchText}
         />
         <Text style={styles.title}>
@@ -254,14 +306,14 @@ const SearchResultScreen = ({ route, navigation }) => {
         </View>
         <View style={styles.searchresultContainer}>
           <FlatList
-            data={filteredProducts.slice(0, 10)}
+            data={filteredProducts.slice(0, 20)}
             keyExtractor={(item, index) => index.toString()}
             numColumns={2}
             renderItem={({ item, index }) => (
               <View style={styles.cardContainer}>
                 <Card containerStyle={styles.card}>
                   <Card.Image
-                    source={{ uri: item.i }}
+                    source={{ uri: item.imageURL }}
                     style={styles.cardImage}
                     onPress={() => {
                       navigation.navigate("Item", { item });
@@ -274,9 +326,7 @@ const SearchResultScreen = ({ route, navigation }) => {
                       €{item.p.toFixed(2)}
                     </Text>
                   </View>
-
                   <Text style={styles.supermarketName}>{item.c}</Text>
-
                   <RNPickerSelect
                     items={lists.map((list) => ({
                       label: list.ListName,
@@ -405,13 +455,15 @@ const styles = StyleSheet.create({
   },
   supermarketName: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    top: 5,
+    left: 5,
     fontSize: 10,
-    color: "black",
-    backgroundColor: "#E2E8EE",
-    borderRadius: 3,
+    color: "white",
+    backgroundColor: "gray",
+    borderRadius: 5,
     padding: 2,
+    // width: 30,
+    // height: 20,
   },
   namepricebox: {
     height: 70,
