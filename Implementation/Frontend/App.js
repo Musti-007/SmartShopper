@@ -63,10 +63,38 @@ const HeaderRight = () => {
     }
   };
 
+  const [firstName, setFirstName] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedFirstName = await AsyncStorage.getItem("firstName");
+
+        setFirstName(storedFirstName);
+      } catch (error) {
+        console.error("Error reading user data from AsyncStorage:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
-    <TouchableOpacity style={{ marginRight: 20 }} onPress={handlePress}>
-      <MaterialIcons name="account-circle" size={40} color="black" />
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity style={{ marginRight: 20 }} onPress={handlePress}>
+        <MaterialIcons name="account-circle" size={40} color="black" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        {isLoggedIn && (
+          <Text
+            style={{ paddingBottom: 10, paddingLeft: 3, fontWeight: "bold" }}
+            onPress={handlePress}
+          >
+            {firstName}
+          </Text>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 };
 
