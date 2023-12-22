@@ -104,8 +104,8 @@ function CreateListScreen({ navigation }) {
 
     const searchTextLower = text.toLowerCase();
     const filteredItems = [];
-    const data = await axios.get("http://192.168.1.218:3000/api/data");
-    // const data = await axios.get("http://localhost:3000/api/data");
+    // const data = await axios.get("http://192.168.1.218:3000/api/data");
+    const data = await axios.get("http://localhost:3000/api/data");
 
     for (const section of data.data) {
       if (
@@ -195,8 +195,8 @@ function CreateListScreen({ navigation }) {
       const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
 
       // Make a POST request to create a new list using Axios
-      const response = await axios.post("http://192.168.1.218:3000/lists", {
-        //   const response = await axios.post("http://localhost:3000/lists", {
+      // const response = await axios.post("http://192.168.1.218:3000/lists", {
+      const response = await axios.post("http://localhost:3000/lists", {
         name: listName,
         items: items,
         userId: userID,
@@ -237,9 +237,9 @@ function CreateListScreen({ navigation }) {
               inputIOS: {
                 color: "white",
                 paddingHorizontal: 10,
-                height: 30,
+                height: 40,
                 backgroundColor: "#6666F6",
-                borderRadius: 10,
+                borderRadius: 8,
               },
               placeholder: {
                 color: "white",
