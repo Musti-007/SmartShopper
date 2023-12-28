@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Card } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
@@ -14,6 +14,28 @@ const ItemScreen = ({ route }) => {
   const [selectedList, setSelectedList] = useState(null);
   const [lists, setLists] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+
+  useEffect(() => {
+    // Fetch lists from the server when the component mounts
+    fetchLists();
+  }, []);
+
+  const fetchLists = async () => {
+    try {
+      // Get the user ID from AsyncStorage
+      const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+
+      // Fetch lists from the server using axios
+      const response = await axios.get(
+        // `http://192.168.1.218:3000/lists/${userID}`
+        `http://localhost:3000/lists/${userID}`
+      );
+      console.log(response.data);
+      setLists(response.data);
+    } catch (error) {
+      console.error("Error fetching lists:", error.message);
+    }
+  };
 
   const fetchData = async (newProducts) => {
     try {
@@ -54,47 +76,69 @@ const ItemScreen = ({ route }) => {
     fetchData(sortedProducts.slice(0, 10));
   }, []);
 
-  useEffect(() => {
-    // Fetch lists from the server when the component mounts
-    fetchLists();
-  }, []);
-  const fetchLists = async () => {
-    try {
-      // Get the user ID from AsyncStorage
-      const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
-
-      // Fetch lists from the server using axios
-      const response = await axios.get(
-        // `http://192.168.1.218:3000/lists/${userID}`
-        `http://localhost:3000/lists/${userID}`
-      );
-      //   console.log(response.data);
-      setLists(response.data);
-    } catch (error) {
-      console.error("Error fetching lists:", error.message);
-    }
-  };
-
   const handleButtonPress = async (item) => {
-    console.log(item);
-    // console.log(selectedList);
     try {
+      const supermarkets = JSON.parse(
+        await AsyncStorage.getItem("supermarkets")
+      );
+
+      const storeLocation = supermarkets.find((supermarket) => {
+        if (
+          item.c.toLowerCase() === "ah" &&
+          supermarket.name.toLowerCase() === "albert heijn"
+        ) {
+          return true;
+        } else if (item.c.toLowerCase() === supermarket.name.toLowerCase()) {
+          return true;
+        }
+      });
+
+      if (lists.length === 0) {
+        try {
+          // Get the user ID from AsyncStorage
+          const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+          const newItem = {
+            name: item.n,
+            price: item.p,
+            description: item.s,
+            store: item.c,
+            location: `${storeLocation.lat}, ${storeLocation.lon}`,
+          };
+          // Make a POST request to create a new list using Axios
+          const response = await axios.post("http://localhost:3000/lists", {
+            name: `List ${userID}`,
+            items: [newItem],
+            userId: userID,
+          });
+
+          // Assuming your API returns the created list in the response.data
+          const newList = response.data;
+        } catch (error) {
+          console.error("Error creating list:", error.message);
+          // Handle the error in a way that makes sense for your application
+        }
+
+        return;
+      }
+
       // Your API endpoint and data
-      // const endpoint = `http://192.168.1.218:3000/products/${selectedList.ListID}`;
-      const endpoint = `http://localhost:3000/products/${selectedList.ListID}`;
+      const endpoint = `http://localhost:3000/products/${selectedList}`;
       const data = {
         productName: item.n,
         price: item.p,
         category: item.s,
         storeName: item.c,
+        storeLocation: `${storeLocation.lat}, ${storeLocation.lon}`,
       };
-      console.log("Request Data:", data);
       // Make a POST request to add a new entry
       const response = await axios.post(endpoint, data);
 
       // Handle the response from the server
-      console.log("Response:", response.data);
-
+      Alert.alert(
+        `Item "${item.n}" has been added to the list "${
+          lists.find((list) => list.ListID === selectedList).ListName
+        }"`
+      );
       // Perform any other actions based on the response
     } catch (error) {
       console.error("Error:", error);
@@ -127,13 +171,13 @@ const ItemScreen = ({ route }) => {
             <Text style={styles.productName}>{item.n}</Text>
             {/* Bottom of the card: Price and Add to List button */}
             <View style={styles.bottomContainer}>
-              <Text style={styles.productPrice}>€{item.p.toFixed(2)}</Text>
+              <Text style={styles.productPrice}>€{item.p}</Text>
             </View>
           </View>
           <RNPickerSelect
             items={lists.map((list) => ({
               label: list.ListName,
-              value: list,
+              value: list.ListID,
             }))}
             placeholder={{
               label: "Select a list",
