@@ -20,7 +20,7 @@ function HomeScreen({ navigation }) {
   const [bestDealProducts, setBestDealProducts] = useState([]);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
 
-  //login
+  // Check login
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -74,7 +74,7 @@ function HomeScreen({ navigation }) {
     })();
   }, []);
 
-  //
+  //Get cheapest products from api
   useEffect(() => {
     const fetchTopCheapestProducts = async () => {
       try {
@@ -133,6 +133,7 @@ function HomeScreen({ navigation }) {
     // Omit bestDealProducts from the dependency array
   }, [currentProductIndex]);
 
+  // Get images for the given products
   const fetchData = async (newProducts) => {
     try {
       const promises = newProducts.map(async (item) => {
@@ -221,7 +222,7 @@ function HomeScreen({ navigation }) {
       navigation.navigate("Lists");
     } else {
       // Handle the case when the user is not logged in
-      // Example: navigation.navigate('Login');
+      navigation.navigate("Login");
     }
   };
 
@@ -230,7 +231,7 @@ function HomeScreen({ navigation }) {
       navigation.navigate("CreateList");
     } else {
       // Handle the case when the user is not logged in
-      // Example: navigation.navigate('Login');
+      navigation.navigate("Login");
     }
   };
 
