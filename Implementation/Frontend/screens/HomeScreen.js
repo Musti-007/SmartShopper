@@ -82,18 +82,36 @@ function HomeScreen({ navigation }) {
         const response = await axios.get("http://localhost:3000/api/data");
         const allProducts = [];
 
-        // Flatten the products array from each section
-        response.data.forEach((section) => {
-          section.d.forEach((product) => {
-            allProducts.push({
-              n: product.n,
-              p: product.p,
-              i: section.i,
-              s: product.s,
-              c: section.c,
-            });
-          });
-        });
+        // // Flatten the products array from each section
+        // response.data.forEach((section) => {
+        //   section.d.forEach((product) => {
+        //     allProducts.push({
+        //       n: product.n,
+        //       p: product.p,
+        //       i: section.i,
+        //       s: product.s,
+        //       c: section.c,
+        //     });
+        //   });
+        // });
+
+        for (const section of response.data) {
+          if (
+            listOfSuperMarkets.some((supermarket) =>
+              checkIfSupermarketExists(supermarket, section)
+            )
+          ) {
+            for (const product of section.d) {
+              allProducts.push({
+                n: product.n,
+                p: product.p,
+                c: section.c,
+                i: section.i,
+                s: product.s,
+              });
+            }
+          }
+        }
 
         // Sort products by price in ascending order
         const sortedProducts = allProducts.sort((a, b) => a.p - b.p);
@@ -112,7 +130,7 @@ function HomeScreen({ navigation }) {
     };
 
     fetchTopCheapestProducts();
-  }, []);
+  }, [listOfSuperMarkets]);
 
   useEffect(() => {
     // Set up an interval to show a new product every 10 seconds
