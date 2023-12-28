@@ -195,7 +195,7 @@ const SearchResultScreen = ({ route, navigation }) => {
 
           // Make a POST request to create a new list using Axios
           // const response = await axios.post("http://192.168.1.218:3000/lists", {
-          const response = await axios.post("http://localhost/lists", {
+          const response = await axios.post("http://localhost:3000/lists", {
             name: `List ${userID}`,
             items: [item],
             userId: userID,
@@ -207,7 +207,7 @@ const SearchResultScreen = ({ route, navigation }) => {
           console.error("Error creating list:", error.message);
           // Handle the error in a way that makes sense for your application
         }
-
+        Alert.alert(`You have successfully created `);
         return;
       }
 
@@ -221,26 +221,26 @@ const SearchResultScreen = ({ route, navigation }) => {
       const supermarkets = JSON.parse(
         await AsyncStorage.getItem("supermarkets")
       );
+
       const storeLocation = supermarkets.find((supermarket) => {
         if (
-          item.supermarket.toLowerCase() === "ah" &&
+          item.c.toLowerCase() === "ah" &&
           supermarket.name.toLowerCase() === "albert heijn"
         ) {
           return true;
-        } else if (
-          item.supermarket.toLowerCase() === supermarket.name.toLowerCase()
-        ) {
+        } else if (item.c.toLowerCase() === supermarket.name.toLowerCase()) {
           return true;
         }
       });
       // Your API endpoint and data
       // const endpoint = `http://192.168.1.218:3000/products/${selectedLists[index].ListID}`;
       const endpoint = `http://localhost:3000/products/${selectedLists[index].ListID}`;
+
       const data = {
         productName: item.n,
         price: item.p,
         category: item.s,
-        storeName: item.supermarket,
+        storeName: item.c,
         storeLocation: `${storeLocation.lat}, ${storeLocation.lon}`,
       };
 
