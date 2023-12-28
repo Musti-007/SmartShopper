@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: 50,
     height: 50,
-    borderRadius: 20,
+    borderRadius: 25,
     // alignSelf: "flex-start",
   },
   productName: {

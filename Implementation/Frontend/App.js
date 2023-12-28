@@ -84,7 +84,7 @@ const HeaderRight = () => {
       <TouchableOpacity style={{ marginRight: 20 }} onPress={handlePress}>
         <MaterialIcons name="account-circle" size={40} color="black" />
       </TouchableOpacity>
-      <TouchableOpacity>
+      <View>
         {isLoggedIn && (
           <Text
             style={{ paddingBottom: 10, paddingLeft: 3, fontWeight: "bold" }}
@@ -93,7 +93,7 @@ const HeaderRight = () => {
             {firstName}
           </Text>
         )}
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };

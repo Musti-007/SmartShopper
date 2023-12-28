@@ -12,7 +12,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import Mail from "react-native-mail";
 
 function ListDetailsScreen({ route }) {
   const { list } = route.params;
