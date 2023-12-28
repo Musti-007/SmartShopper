@@ -82,19 +82,6 @@ function HomeScreen({ navigation }) {
         const response = await axios.get("http://localhost:3000/api/data");
         const allProducts = [];
 
-        // // Flatten the products array from each section
-        // response.data.forEach((section) => {
-        //   section.d.forEach((product) => {
-        //     allProducts.push({
-        //       n: product.n,
-        //       p: product.p,
-        //       i: section.i,
-        //       s: product.s,
-        //       c: section.c,
-        //     });
-        //   });
-        // });
-
         for (const section of response.data) {
           if (
             listOfSuperMarkets.some((supermarket) =>
@@ -117,7 +104,7 @@ function HomeScreen({ navigation }) {
         const sortedProducts = allProducts.sort((a, b) => a.p - b.p);
 
         // Get the top 10 cheapest products
-        const topCheapestProducts = sortedProducts.slice(0, 10);
+        const topCheapestProducts = sortedProducts.slice(0, 15);
         console.log(topCheapestProducts);
         // Fetch data for the top 10 products
         const productsWithImages = await fetchData(topCheapestProducts);
