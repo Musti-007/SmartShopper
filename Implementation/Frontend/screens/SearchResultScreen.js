@@ -107,8 +107,8 @@ const SearchResultScreen = ({ route, navigation }) => {
       sortedProducts.sort((a, b) => a.n.localeCompare(b.n));
     }
 
-    setFilteredProducts(sortedProducts.slice(0, 10));
-    fetchData(sortedProducts.slice(0, 10));
+    setFilteredProducts(sortedProducts.slice(0, 20));
+    fetchData(sortedProducts.slice(0, 20));
   }, []);
 
   const handleSearch = async () => {
@@ -155,9 +155,9 @@ const SearchResultScreen = ({ route, navigation }) => {
       console.log("Sorting by name");
       filteredItems.sort((a, b) => a.n.localeCompare(b.n));
     }
-    setFilteredProducts(filteredItems.slice(0, 10));
+    setFilteredProducts(filteredItems.slice(0, 20));
 
-    fetchData(filteredItems.slice(0, 10));
+    fetchData(filteredItems.slice(0, 20));
   };
 
   useEffect(() => {

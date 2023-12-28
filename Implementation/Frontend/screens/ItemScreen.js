@@ -72,8 +72,8 @@ const ItemScreen = ({ route }) => {
   useEffect(() => {
     let sortedProducts = [...filteredProducts];
 
-    setFilteredProducts(sortedProducts.slice(0, 10));
-    fetchData(sortedProducts.slice(0, 10));
+    setFilteredProducts(sortedProducts.slice(0, 20));
+    fetchData(sortedProducts.slice(0, 20));
   }, []);
 
   const handleButtonPress = async (item) => {
