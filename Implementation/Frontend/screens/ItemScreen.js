@@ -84,11 +84,14 @@ const ItemScreen = ({ route }) => {
 
       const storeLocation = supermarkets.find((supermarket) => {
         if (
-          item.c.toLowerCase() === "ah" &&
+          (item.c.toLowerCase() === "ah" ||
+            item.c.toLowerCase() === "jan linders") &&
           supermarket.name.toLowerCase() === "albert heijn"
         ) {
           return true;
-        } else if (item.c.toLowerCase() === supermarket.name.toLowerCase()) {
+        } else if (
+          item.c.toLowerCase().includes(supermarket.name.toLowerCase())
+        ) {
           return true;
         }
       });
@@ -104,6 +107,7 @@ const ItemScreen = ({ route }) => {
             store: item.c,
             location: `${storeLocation.lat}, ${storeLocation.lon}`,
           };
+
           // Make a POST request to create a new list using Axios
           const response = await axios.post("http://localhost:3000/lists", {
             name: `List ${userID}`,
@@ -171,7 +175,7 @@ const ItemScreen = ({ route }) => {
             <Text style={styles.productName}>{item.n}</Text>
             {/* Bottom of the card: Price and Add to List button */}
             <View style={styles.bottomContainer}>
-              <Text style={styles.productPrice}>€{item.p}</Text>
+              <Text style={styles.productPrice}>€{item.p.toFixed(2)}</Text>
             </View>
           </View>
           <RNPickerSelect

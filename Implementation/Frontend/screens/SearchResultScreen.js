@@ -224,7 +224,8 @@ const SearchResultScreen = ({ route, navigation }) => {
 
       const storeLocation = supermarkets.find((supermarket) => {
         if (
-          item.c.toLowerCase() === "ah" &&
+          (item.c.toLowerCase() === "ah" ||
+            item.c.toLowerCase() === "jan linders") &&
           supermarket.name.toLowerCase() === "albert heijn"
         ) {
           return true;
@@ -248,7 +249,8 @@ const SearchResultScreen = ({ route, navigation }) => {
       const response = await axios.post(endpoint, data);
 
       // Handle the response from the server
-      console.log("Response:", response.data);
+
+      Alert.alert(`Item "${item.n}" has been added to the list "`);
 
       // Perform any other actions based on the response
     } catch (error) {

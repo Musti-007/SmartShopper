@@ -148,10 +148,9 @@ function CreateListScreen({ navigation }) {
   const handleItemPress = (item) => {
     const foundSupermarket = supermarkets.find((supermarket) => {
       if (
-        (item.supermarket.toLowerCase() === "ah" &&
-          supermarket.name.toLowerCase() === "albert heijn") ||
-        (item.supermarket.toLowerCase() === "janlinders" &&
-          supermarket.name.toLowerCase() === "jan linders")
+        (item.supermarket.toLowerCase() === "ah" ||
+          item.supermarket.toLowerCase() === "jan linders") &&
+        supermarket.name.toLowerCase() === "albert heijn"
       ) {
         return supermarket.name;
       } else if (
