@@ -20,20 +20,36 @@ const ItemScreen = ({ route }) => {
     fetchLists();
   }, []);
 
+  // const fetchLists = async () => {
+  //   try {
+  //     // Get the user ID from AsyncStorage
+  //     const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+
+  //     // Fetch lists from the server using axios
+  //     const response = await axios.get(
+  //       // `http://192.168.1.218:3000/lists/${userID}`
+  //       `http://localhost:3000/lists/${userID}`
+  //     );
+  //     console.log(response.data);
+  //     setLists(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching lists:", error.message);
+  //   }
+  // };
   const fetchLists = async () => {
     try {
-      // Get the user ID from AsyncStorage
-      const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
-
-      // Fetch lists from the server using axios
-      const response = await axios.get(
-        // `http://192.168.1.218:3000/lists/${userID}`
-        `http://localhost:3000/lists/${userID}`
-      );
+      const userID = await AsyncStorage.getItem("userId");
+      const response = await axios.get(`http://localhost:3000/lists/${userID}`);
       console.log(response.data);
       setLists(response.data);
     } catch (error) {
-      console.error("Error fetching lists:", error.message);
+      if (error.response && error.response.status === 404) {
+        // Handle 404 (Not Found) response
+        console.log("No lists found for the user.");
+        setLists([]); // Set an empty array or perform other actions
+      } else {
+        console.error("Error fetching lists:", error.message);
+      }
     }
   };
 
