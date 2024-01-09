@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Share,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ function ListDetailsScreen({ route }) {
   const [userLocation, setUserLocation] = useState("");
   const [combinedData, setCombinedData] = useState([]);
   const [userEmail, setUserEmail] = useState(""); // Added state for userEmail
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,6 +53,7 @@ function ListDetailsScreen({ route }) {
     if (userLocation) {
       const fetchData = async () => {
         try {
+          setLoading(true);
           const response = await axios.get(
             // `http://192.168.1.218:3000/combinedData/${list.ListID}`
             `http://localhost:3000/combinedData/${list.ListID}`
@@ -76,6 +79,8 @@ function ListDetailsScreen({ route }) {
           setCombinedData(itemsWithDistances);
         } catch (error) {
           console.error("Error fetching combined data:", error);
+        } finally {
+          setLoading(false);
         }
       };
 
@@ -168,51 +173,68 @@ function ListDetailsScreen({ route }) {
           <AntDesign name="left" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.title}>List {list.ListName}</Text>
-        <View style={styles.itemlistbox}>
-          <FlatList
-            data={combinedData}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.listItem}>
-                <View style={styles.productInfo}>
-                  <AntDesign
-                    name="shoppingcart"
-                    size={24}
-                    color="#007bff"
-                    style={styles.icon}
-                  />
-                  <View style={styles.productTextContainer}>
-                    <Text style={styles.productName}>{item.ProductName}</Text>
-                    <Text style={styles.productDistance}>{item.distance}</Text>
-                  </View>
-                </View>
-                <Text style={styles.productPrice}>
-                  €{item.Price.toFixed(2)}
-                </Text>
-              </View>
-            )}
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="white"
+            style={styles.loadingIndicator}
           />
-        </View>
-        <View style={styles.totalPricebox}>
-          <Text style={styles.totalText}>Total: </Text>
-          <Text style={styles.totalPrice}>€{calculateTotal(combinedData)}</Text>
-        </View>
-        <View style={styles.groupbutton}>
-          <TouchableOpacity
-            style={styles.sharelistbutton}
-            onPress={() =>
-              navigation.navigate("GetDirection", { combinedData })
-            }
-          >
-            <Text style={styles.buttonText}>Get Direction</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sharelistbutton}
-            onPress={handleShareListPress}
-          >
-            <Text style={styles.buttonText}>Share List</Text>
-          </TouchableOpacity>
-        </View>
+        ) : (
+          <>
+            <View style={styles.itemlistbox}>
+              <FlatList
+                data={combinedData}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.listItem}>
+                    <View style={styles.productInfo}>
+                      <AntDesign
+                        name="shoppingcart"
+                        size={24}
+                        color="#007bff"
+                        style={styles.icon}
+                      />
+                      <View style={styles.productTextContainer}>
+                        <Text style={styles.productName}>
+                          {item.ProductName}
+                        </Text>
+                        <Text style={styles.productDistance}>
+                          {item.distance}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.productPrice}>
+                      €{item.Price.toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+
+            <View style={styles.totalPricebox}>
+              <Text style={styles.totalText}>Total: </Text>
+              <Text style={styles.totalPrice}>
+                €{calculateTotal(combinedData)}
+              </Text>
+            </View>
+            <View style={styles.groupbutton}>
+              <TouchableOpacity
+                style={styles.sharelistbutton}
+                onPress={() =>
+                  navigation.navigate("GetDirection", { combinedData })
+                }
+              >
+                <Text style={styles.buttonText}>Get Direction</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sharelistbutton}
+                onPress={handleShareListPress}
+              >
+                <Text style={styles.buttonText}>Share List</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
     </LinearGradient>
   );
@@ -311,6 +333,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
     fontSize: 16,
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignSelf: "center",
   },
 });
 
