@@ -335,9 +335,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   loadingIndicator: {
-    flex: 1,
-    justifyContent: "center",
-    alignSelf: "center",
+    marginTop: "55%",
   },
 });
 
