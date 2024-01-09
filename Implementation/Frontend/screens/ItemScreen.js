@@ -20,25 +20,10 @@ const ItemScreen = ({ route }) => {
     fetchLists();
   }, []);
 
-  // const fetchLists = async () => {
-  //   try {
-  //     // Get the user ID from AsyncStorage
-  //     const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
-
-  //     // Fetch lists from the server using axios
-  //     const response = await axios.get(
-  //       // `http://192.168.1.218:3000/lists/${userID}`
-  //       `http://localhost:3000/lists/${userID}`
-  //     );
-  //     console.log(response.data);
-  //     setLists(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching lists:", error.message);
-  //   }
-  // };
   const fetchLists = async () => {
     try {
       const userID = await AsyncStorage.getItem("userId");
+      // const response = await axios.get(`http://192.168.1.218:3000/lists/${userID}`);
       const response = await axios.get(`http://localhost:3000/lists/${userID}`);
       console.log(response.data);
       setLists(response.data);
@@ -125,6 +110,7 @@ const ItemScreen = ({ route }) => {
           };
 
           // Make a POST request to create a new list using Axios
+          // const response = await axios.post("http://192.168.1.218:3000/lists", {
           const response = await axios.post("http://localhost:3000/lists", {
             name: `List ${userID}`,
             items: [newItem],
@@ -142,6 +128,7 @@ const ItemScreen = ({ route }) => {
       }
 
       // Your API endpoint and data
+      // const endpoint = `http://192.168.1.218:3000/products/${selectedList}`;
       const endpoint = `http://localhost:3000/products/${selectedList}`;
       const data = {
         productName: item.n,
