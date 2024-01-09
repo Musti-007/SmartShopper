@@ -188,36 +188,6 @@ const SearchResultScreen = ({ route, navigation }) => {
 
   const handleButtonPress = async (item, index) => {
     try {
-      if (lists.length === 0) {
-        try {
-          // Get the user ID from AsyncStorage
-          const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
-
-          // Make a POST request to create a new list using Axios
-          // const response = await axios.post("http://192.168.1.218:3000/lists", {
-          const response = await axios.post("http://localhost:3000/lists", {
-            name: `List ${userID}`,
-            items: [item],
-            userId: userID,
-          });
-
-          // Assuming your API returns the created list in the response.data
-          const newList = response.data;
-        } catch (error) {
-          console.error("Error creating list:", error.message);
-          // Handle the error in a way that makes sense for your application
-        }
-        Alert.alert(`You have successfully created `);
-        return;
-      }
-
-      // Check if a list is selected for the current item
-      const selectedListForItem = selectedLists[index];
-      if (!selectedListForItem) {
-        console.log("Please select a list for the item");
-        return;
-      }
-
       const supermarkets = JSON.parse(
         await AsyncStorage.getItem("supermarkets")
       );
@@ -233,6 +203,41 @@ const SearchResultScreen = ({ route, navigation }) => {
           return true;
         }
       });
+
+      if (lists.length === 0) {
+        try {
+          const userID = await AsyncStorage.getItem("userId"); // Replace 'userId' with your actual key
+          const newItem = {
+            name: item.n,
+            price: item.p,
+            description: item.s,
+            store: item.c,
+            location: `${storeLocation.lat}, ${storeLocation.lon}`,
+          };
+
+          const response = await axios.post("http://localhost:3000/lists", {
+            name: `List ${userID}`,
+            items: [newItem],
+            userId: userID,
+          });
+
+          // Assuming your API returns the created list in the response.data
+          const newList = response.data;
+        } catch (error) {
+          console.error("Error creating list:", error.message);
+          // Handle the error in a way that makes sense for your application
+        }
+        Alert.alert(`You have successfully created a list.`);
+        return;
+      }
+
+      // Check if a list is selected for the current item
+      const selectedListForItem = selectedLists[index];
+      if (!selectedListForItem) {
+        console.log("Please select a list for the item");
+        return;
+      }
+
       // Your API endpoint and data
       // const endpoint = `http://192.168.1.218:3000/products/${selectedLists[index].ListID}`;
       const endpoint = `http://localhost:3000/products/${selectedLists[index].ListID}`;
