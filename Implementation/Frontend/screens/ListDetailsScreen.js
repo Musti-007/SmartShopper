@@ -89,6 +89,9 @@ function ListDetailsScreen({ route }) {
   }, [userLocation, list.ListID]);
 
   async function calculateRouteDistance(sourceLocation, destinationLocation) {
+    if (!sourceLocation || !destinationLocation) {
+      return "Location not available";
+    }
     const osrmEndpoint = "http://router.project-osrm.org/route/v1/driving/";
     const coordinates1 = sourceLocation.split(",");
     const coordinates2 = destinationLocation.split(",");
@@ -120,14 +123,6 @@ function ListDetailsScreen({ route }) {
   const calculateTotal = (data) => {
     const total = data.reduce((acc, item) => acc + item.Price, 0);
     return total.toFixed(2); // Assuming Price is a floating-point number
-  };
-
-  const saveUserEmail = async (email) => {
-    try {
-      await AsyncStorage.setItem("userEmail", email);
-    } catch (error) {
-      console.error("Error saving user email:", error);
-    }
   };
 
   const handleShareListPress = async () => {
