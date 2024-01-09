@@ -123,7 +123,7 @@ const ItemScreen = ({ route }) => {
           console.error("Error creating list:", error.message);
           // Handle the error in a way that makes sense for your application
         }
-
+        Alert.alert(`You have successfully created a list.`);
         return;
       }
 
