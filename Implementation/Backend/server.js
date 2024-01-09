@@ -34,7 +34,6 @@ const jsonData = require("./data/supermarkets.json");
 async function getAuthToken() {
   const data = {
     clientId: "appie",
-    // Include other fields if needed
   };
 
   const headers = {
@@ -107,18 +106,6 @@ async function performProductSearch(query) {
     return [];
   }
 }
-
-// // // Usage
-// (async () => {
-// 	try {
-// 		const authToken = await getAuthToken();
-// 		// Use the obtained token for subsequent requests
-// 		await getProductSearch(authToken, encodeURIComponent('sdfsdfsdfsdf'));
-// 		// await getProductSearch(authToken, 'g%27woon%20Koolzuurvrij%20Mineraalwater%20500%20ml');
-// 	} catch (error) {
-// 		console.error('An error occurred:', error);
-// 	}
-// })();
 
 // Express endpoint for performing product search
 app.get("/api/productSearch", async (req, res) => {
