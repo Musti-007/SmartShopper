@@ -312,10 +312,10 @@ function HomeScreen({ navigation }) {
                 }}
               >
                 <Card.Image
+                  style={styles.bestDealImage}
                   source={{
                     uri: bestDealProducts[currentProductIndex].imageURL,
                   }}
-                  style={styles.bestDealImage}
                 />
                 <Text style={styles.bestDealName}>
                   {bestDealProducts[currentProductIndex].n}
@@ -436,11 +436,13 @@ const styles = StyleSheet.create({
   },
   bestDealImage: {
     width: 350,
-    height: 350,
     marginBottom: 10,
     marginTop: 10,
-    alignSelf: "center",
-    borderRadius: 10,
+    marginLeft: 10,
+    padding: 10,
+    height: 350,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   bestDealPrice: {
     fontSize: 24,
